@@ -1,0 +1,3 @@
+[submodule "mashers-gl-updater"]
+	path = mashers-gl-updater
+	url = https://github.com/ihaveamac/mashers-gl-updater
