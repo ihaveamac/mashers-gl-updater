@@ -8,7 +8,7 @@ boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.16", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.2", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(140, 140, 140), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
@@ -19,7 +19,7 @@ function updateState(stype, info)
 	elseif stype == "noconnection" then
 		Screen.debugPrint(5, 25, "Couldn't get the latest version!", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.debugPrint(5, 40, "Check your connection to the Internet.", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 60, "Press B to exit", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 60, "B: exit", Color.new(255, 255, 255), TOP_SCREEN)
 		co = Console.new(BOTTOM_SCREEN)
 		Console.append(co, info)
 		Console.show(co)
@@ -30,19 +30,8 @@ function updateState(stype, info)
 			end
 		end
 	elseif stype == "showversion" then
-		Screen.debugPrint(5, 25, "(DEBUG) Full result: "..info, Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 45, "Press A to download & update", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 60, "Press B to exit", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.flip()
-		while true do
-			local pad = Controls.read()
-			if Controls.check(pad, KEY_B) then exit()
-			elseif Controls.check(pad, KEY_A) then return end
-		end
-	elseif stype == "errorversion" then
-		Screen.debugPrint(5, 25, "Do you want to update?"..Network.requestString(boot3dsx_url), Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 45, "Press A to download & update", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 60, "Press B to exit", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 25, "Do you want to download beta "..info.."?", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 45, "A: yes     B: no", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
 		while true do
 			local pad = Controls.read()
@@ -50,11 +39,11 @@ function updateState(stype, info)
 			elseif Controls.check(pad, KEY_A) then return end
 		end
 	elseif stype == "downloading" then
-		Screen.debugPrint(5, 25, "Downloading, sit tight", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 25, "Downloading beta "..info..", sit tight!", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
 	elseif stype == "done" then
 		Screen.debugPrint(5, 25, "All done!", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 45, "Press B to exit", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 45, "B: exit", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
 		while true do
 			if Controls.check(Controls.read(), KEY_B) then
@@ -73,8 +62,7 @@ function exit()
 end
 
 -- #define currentversion XX
--- string.sub 23         ^
--- this includes the space. this is intended.
+-- string.sub 24          ^
 
 Screen.waitVblankStart()
 updateState("gettingver")
@@ -89,7 +77,7 @@ end
 
 System.createDirectory(System.currentDirectory().."/tmp")
 --           #define currentversion <error>
-fullstate = "error error error error<error>" -- substring would get <error> if something weird happened
+fullstate = "error error error error<error>" -- substring would get <error> if something weird happened. should NEVER happen
 function getServerState()
 	fullstate = Network.requestString(versionh_url)
 end
@@ -104,12 +92,9 @@ if fullstate == "notready" then
 	Timer.destroy(ti)
 	getServerState()
 end
-if Controls.check(Controls.read(), KEY_R) then
-	updateState("showversion", fullstate)
-else
-	updateState("errorversion")
-end
-updateState("downloading")
+sstate = string.sub(fullstate, 24)
+updateState("showversion", sstate)
+updateState("downloading", sstate)
 Network.downloadFile(boot3dsx_url, System.currentDirectory().."/tmp/boot1.3dsx")
 System.deleteFile(boot3dsx_location)
 System.renameFile(System.currentDirectory().."/tmp/boot1.3dsx", boot3dsx_location)
