@@ -7,7 +7,7 @@ boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.02", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.03", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(255, 255, 255), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Getting latest version number", Color.new(255, 255, 255), TOP_SCREEN)
@@ -41,6 +41,18 @@ function updateState(stype, info)
 	elseif stype == "downloading" then
 		Screen.debugPrint(5, 25, "Downloading beta "..info..", sit tight", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
+	elseif stype == "done"
+		Screen.debugPrint(5, 25, "Downloaded & installed!", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 45, "Press B to exit", Color.new(255, 255, 255), TOP_SCREEN)
+		co = Console.new(BOTTOM_SCREEN)
+		Console.append(co, info)
+		Console.show(co)
+		Screen.flip()
+		while true do
+			if Controls.check(Controls.read(), KEY_B) then
+				exit()
+			end
+		end
 	end
 end
 
@@ -87,4 +99,4 @@ updateState("downloading", state)
 Network.downloadFile(boot3dsx_url, System.currentDirectory().."/tmp/boot1.3dsx")
 System.deleteFile(boot3dsx_location)
 System.renameFile(System.currentDirectory().."/tmp/boot1.3dsx", boot3dsx_location)
-exit()
+updateState("done")
