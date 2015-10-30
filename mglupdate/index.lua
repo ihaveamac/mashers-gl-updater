@@ -1,13 +1,14 @@
 dofile(System.currentDirectory().."/config.txt")
 
 getstate_url = "http://ianburgwin.net/mglupdate/updatestate.php"
+versionh_url = "http://ianburgwin.net/mglupdate/version.h"
 boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 -- as in README.md, https sites don't work in ctrulib, unless there's a workaround
 
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.15", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.16", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(140, 140, 140), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
@@ -39,7 +40,7 @@ function updateState(stype, info)
 			elseif Controls.check(pad, KEY_A) then return end
 		end
 	elseif stype == "errorversion" then
-		Screen.debugPrint(5, 25, "Do you want to update?", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 25, "Do you want to update?"..Network.requestString(boot3dsx_url), Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.debugPrint(5, 45, "Press A to download & update", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.debugPrint(5, 60, "Press B to exit", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
@@ -71,31 +72,30 @@ function exit()
 	System.exit()
 end
 
--- READY:#define currentversion XX
--- string.sub 29               ^
+-- #define currentversion XX
+-- string.sub 23         ^
 -- this includes the space. this is intended.
 
 Screen.waitVblankStart()
 updateState("gettingver")
 
+-- check network connection and trigger actions on the server
+status, err = pcall(function()
+	Network.requestString(getstate_url)
+end)
+if not status then
+	updateState("noconnection", err)
+end
+
 System.createDirectory(System.currentDirectory().."/tmp")
-fullstate = "error error error error error<error>" -- substring would get <error> if something weird happened
+--           #define currentversion <error>
+fullstate = "error error error error<error>" -- substring would get <error> if something weird happened
 function getServerState()
-	status, err = pcall(function()
-		System.deleteFile(System.currentDirectory().."/tmp/state")
-		-- Network.requestString did not seem to work properly.
-		Network.downloadFile(getstate_url, System.currentDirectory().."/tmp/state")
-		local tmp_s = io.open(System.currentDirectory().."/tmp/state", FREAD)
-		fullstate = io.read(tmp_s, 0, io.size(tmp_s))
-		io.close(tmp_s)
-	end)
-	if not status then
-		updateState("noconnection", err)
-	end
+	fullstate = Network.requestString(versionh_url)
 end
 getServerState()
 
-if state == "DOWNLOADING" then
+if fullstate == "notready" then
 	-- expects the boot.3dsx to be cached on the server quickly. normally won't take more than 1-2 seconds
 	updateState("cacheupdating")
 	ti = Timer.new()
