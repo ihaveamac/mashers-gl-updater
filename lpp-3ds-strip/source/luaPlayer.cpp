@@ -40,7 +40,6 @@
 #include <string.h>
 #include <3ds.h>
 #include "include/luaplayer.h"
-#include "include/khax/khax.h"
 
 static lua_State *L;
 bool isCSND;
@@ -56,12 +55,8 @@ const char *runScript(const char* script, bool isStringBuffer)
 	// Modules
 	luaSystem_init(L);
 	luaScreen_init(L);
-	luaGraphics_init(L);
 	luaControls_init(L);
 	luaNetwork_init(L);
-	luaTimer_init(L);
-	luaSound_init(L);
-	luaVideo_init(L);
 	
 	int s = 0;
 	const char *errMsg = NULL;

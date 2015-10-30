@@ -1,7 +1,7 @@
 # mashers's Grid Launcher Updater
 This program grabs the latest version of Masher's Homebrew Launcher with grid layout. You can check it out here: https://gbatemp.net/threads/release-homebrew-launcher-with-grid-layout.397527/
 
-This program uses Lua Player Plus by Rinnegatamante. This program's build is based on [this commit](https://github.com/Rinnegatamante/lpp-3ds/tree/312125395509486ddac02512a3594f8a904ebb75). The source of this is in "lpp-3ds-strip".
+This program uses a modified Lua Player Plus by Rinnegatamante to greatly reduce filesize. It is based on [this commit](https://github.com/Rinnegatamante/lpp-3ds/tree/312125395509486ddac02512a3594f8a904ebb75). The source of this is in "lpp-3ds-strip".
 
 The "site" part is meant to download and cache the latest version and boot1.3dsx from https://github.com/mashers/3ds_hb_menu. This is done because ctrulib can't seem to download from HTTPS sites (if there is a way, tell me and I'll forward it).
 
