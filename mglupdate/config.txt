@@ -1,0 +1,4 @@
+-- If the location of the launcher is not /boot.3dsx, put the correct one here.
+-- You would want to do this if you are using something like the emergency launcher.
+
+boot3dsx_location = "/boot.3dsx"
