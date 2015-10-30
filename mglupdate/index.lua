@@ -1,8 +1,13 @@
 dofile(System.currentDirectory().."/config.txt")
+
+getstatus_url = "http://ianburgwin.net/mglupdate/getstate.php"
+boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
+-- as in README.md, https sites don't work in ctrulib, unless there's a workaround
+
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.01", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.02", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(255, 255, 255), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Getting latest version number", Color.new(255, 255, 255), TOP_SCREEN)
@@ -56,7 +61,8 @@ state = "READY:#define currentversion <error>" -- substring would get <error> if
 function getServerState()
 	status, err = pcall(function()
 		System.deleteFile(System.currentDirectory().."/tmp/status")
-		Network.downloadFile("http://ianburgwin.net/mglupdate/getstate.php", System.currentDirectory().."/tmp/state")
+		-- Network.requestString did not seem to work properly.
+		Network.downloadFile(getstatus_url, System.currentDirectory().."/tmp/state")
 		local tmp_s = io.open(System.currentDirectory().."/tmp/state", FREAD)
 		state = io.read(tmp_s, 0, io.size(tmp_s))
 		io.close(tmp_s)
@@ -78,7 +84,7 @@ end
 state = string.sub(state, 30)
 updateState("showversion", state)
 updateState("downloading", state)
-Network.downloadFile("http://ianburgwin.net/mglupdate/boot1.3dsx", System.currentDirectory().."/tmp/boot1.3dsx")
+Network.downloadFile(boot3dsx_url, System.currentDirectory().."/tmp/boot1.3dsx")
 System.deleteFile(boot3dsx_location)
 System.renameFile(System.currentDirectory().."/tmp/boot1.3dsx", boot3dsx_location)
 exit()
