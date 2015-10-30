@@ -16,7 +16,7 @@ if (file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt") == "DOWN
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/version.h", $versionh_server);
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/boot1.3dsx", $boot3dsx);
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt", "READY");
-		$result = "READC:".$versionh_server;
+		$result = "READY:".$versionh_server;
 	} else {
 		$result = "READY:".$versionh_server;
 	}
