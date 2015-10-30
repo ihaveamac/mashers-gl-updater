@@ -10,14 +10,11 @@ if (file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt") == "DOWN
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/version.h", "notready"); // notready = server is busy to client
 		
 		$boot3dsx = file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/boot1.3dsx");
-		$indexlua = file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/gridlauncher/update/index.lua");
 		
 		unlink($_SERVER["DOCUMENT_ROOT"]."/mglupdate/version.h");
 		unlink($_SERVER["DOCUMENT_ROOT"]."/mglupdate/boot1.3dsx");
-		unlink($_SERVER["DOCUMENT_ROOT"]."/mglupdate/index.lua");
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/version.h", $versionh_server);
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/boot1.3dsx", $boot3dsx);
-		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/index.lua", $indexlua);
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt", "READY");
 		$result = "READY:".$versionh_server;
 	} else {
