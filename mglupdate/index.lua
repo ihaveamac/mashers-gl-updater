@@ -2,7 +2,7 @@ dofile(System.currentDirectory().."/config.txt")
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.01", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(255, 255, 255), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Getting latest version number", Color.new(255, 255, 255), TOP_SCREEN)
@@ -24,7 +24,7 @@ function updateState(stype, info)
 			end
 		end
 	elseif stype == "showversion" then
-		Screen.debugPrint(5, 25, "The latest beta is '"..info.."'", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 25, "The latest beta is "..info.."", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.debugPrint(5, 45, "Press A to download & update", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.debugPrint(5, 60, "Press B to exit", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
