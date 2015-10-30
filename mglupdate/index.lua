@@ -49,7 +49,7 @@ function updateState(stype, info)
 			elseif Controls.check(pad, KEY_A) then return end
 		end
 	elseif stype == "downloading" then
-		Screen.debugPrint(5, 25, "Downloading version"..info..", sit tight", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 25, "Downloading, sit tight", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
 	elseif stype == "done" then
 		Screen.debugPrint(5, 25, "Downloaded & installed!", Color.new(255, 255, 255), TOP_SCREEN)
