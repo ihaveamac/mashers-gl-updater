@@ -1,5 +1,4 @@
 <?php
-header('Content-Type: text/plain');
 $result = "test";
 if (file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt") == "DOWNLOADING") {
 	$result = "DOWNLOADING";
