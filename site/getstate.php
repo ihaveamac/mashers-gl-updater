@@ -6,7 +6,7 @@ if (file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt") == "DOWN
 } else {
 	$versionh_local = file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/version.h");
 	$versionh_server = file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/source/version.h");
-	if (strcmp($versionh_server, $versionh_local)) {
+	if (strcmp($versionh_server, $versionh_local) !== 0) {
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt", "DOWNLOADING");
 	
 		$boot3dsx = file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/boot1.3dsx");
