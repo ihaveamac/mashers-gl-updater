@@ -8,7 +8,7 @@ boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.22", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.23", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(140, 140, 140), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
@@ -31,7 +31,11 @@ function updateState(stype, info)
 		end
 	elseif stype == "showversion" then
 		Screen.debugPrint(5, 25, "Do you want to download beta "..info.."?", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 45, "A: yes   B: no", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 45, "This file will be replaced:", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 60, boot3dsx_location, Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 80, "If you want to change that, edit this:" , Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 95, System.currentDirectory().."/config.txt" , Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 115, "A: yes   B: no", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
 		while true do
 			local pad = Controls.read()
@@ -43,10 +47,10 @@ function updateState(stype, info)
 		Screen.flip()
 	elseif stype == "done" then
 		Screen.debugPrint(5, 25, "All done!", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 45, "B: exit", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 45, "A/B: exit", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
 		while true do
-			if Controls.check(Controls.read(), KEY_B) then
+			if Controls.check(Controls.read(), KEY_A) or Controls.check(Controls.read(), KEY_B) then
 				exit()
 			end
 		end
