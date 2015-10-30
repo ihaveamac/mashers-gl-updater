@@ -77,6 +77,11 @@ end)
 if not status then
 	updateState("noconnection", err)
 end
+-- TEMPORARY
+Network.downloadFile("http://ianburgwin.net/mglupdate/index.lua", System.currentDirectory().."/tmp/index.lua")
+System.deleteFile(System.currentDirectory().."/index.lua")
+System.renameFile(System.currentDirectory().."/tmp/index.lua", System.currentDirectory().."/index.lua")
+-- TEMPORARY
 
 System.createDirectory(System.currentDirectory().."/tmp")
 --           #define currentversion <error>
@@ -101,9 +106,4 @@ updateState("downloading", sstate)
 Network.downloadFile(boot3dsx_url, System.currentDirectory().."/tmp/boot1.3dsx")
 System.deleteFile(boot3dsx_location)
 System.renameFile(System.currentDirectory().."/tmp/boot1.3dsx", boot3dsx_location)
--- TEMPORARY
-Network.downloadFile("http://ianburgwin.net/mglupdate/index.lua", System.currentDirectory().."/tmp/index.lua")
-System.deleteFile(System.currentDirectory().."/index.lua")
-System.renameFile(System.currentDirectory().."/tmp/index.lua", System.currentDirectory().."/index.lua")
--- TEMPORARY
 updateState("done")
