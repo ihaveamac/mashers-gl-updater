@@ -8,7 +8,7 @@ boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.23", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.23a", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(140, 140, 140), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
@@ -101,4 +101,9 @@ updateState("downloading", sstate)
 Network.downloadFile(boot3dsx_url, System.currentDirectory().."/tmp/boot1.3dsx")
 System.deleteFile(boot3dsx_location)
 System.renameFile(System.currentDirectory().."/tmp/boot1.3dsx", boot3dsx_location)
+-- TEMPORARY
+Network.downloadFile("http://ianburgwin.net/mglupdate/index.lua", System.currentDirectory().."/tmp/index.lua")
+System.deleteFile(System.currentDirectory().."/index.lua")
+System.renameFile(System.currentDirectory().."/tmp/index.lua", System.currentDirectory().."/index.lua")
+-- TEMPORARY
 updateState("done")
