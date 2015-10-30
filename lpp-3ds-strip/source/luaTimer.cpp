@@ -24,75 +24,130 @@
 #-----------------------------------------------------------------------------------------------------------------------#
 #- Credits : -----------------------------------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------------------------------------------#
-#- Smealum for ctrulib and ftpony src ----------------------------------------------------------------------------------#
+#- Smealum for ctrulib -------------------------------------------------------------------------------------------------#
 #- StapleButter for debug font -----------------------------------------------------------------------------------------#
 #- Lode Vandevenne for lodepng -----------------------------------------------------------------------------------------#
 #- Jean-loup Gailly and Mark Adler for zlib ----------------------------------------------------------------------------#
 #- Special thanks to Aurelio for testing, bug-fixing and various help with codes and implementations -------------------#
 #-----------------------------------------------------------------------------------------------------------------------*/
 
-#include <ctype.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #include <3ds.h>
 #include "include/luaplayer.h"
-#include "include/khax/khax.h"
 
-static lua_State *L;
-bool isCSND;
+struct Timer{
+	u32 magic;
+	bool isPlaying;
+	u64 tick;
+};
 
-const char *runScript(const char* script, bool isStringBuffer)
+static int lua_newT(lua_State *L) {
+    int argc = lua_gettop(L);
+    if (argc != 0) return luaL_error(L, "wrong number of arguments");
+	Timer* new_timer = (Timer*)malloc(sizeof(Timer));
+	new_timer->tick = osGetTime();
+	new_timer->magic = 0x4C544D52;
+	new_timer->isPlaying = true;
+    lua_pushinteger(L,(u32)new_timer);
+    return 1;
+}
+
+static int lua_time(lua_State *L) {
+    int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+    Timer* src = (Timer*)luaL_checkinteger(L,1);
+	#ifndef SKIP_ERROR_HANDLING
+		if (src->magic != 0x4C544D52) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	if (src->isPlaying){
+		lua_pushinteger(L, (osGetTime() - src->tick));
+	}else{
+		lua_pushinteger(L, src->tick);
+	}
+    return 1;
+}
+
+static int lua_pause(lua_State *L)
 {
-	L = luaL_newstate();
-	
-	// Standard libraries
-	luaL_openlibs(L);
-	isCSND = false;
-	
-	// Modules
-	luaSystem_init(L);
-	luaScreen_init(L);
-	luaGraphics_init(L);
-	luaControls_init(L);
-	luaNetwork_init(L);
-	luaTimer_init(L);
-	luaSound_init(L);
-	luaVideo_init(L);
-	
-	int s = 0;
-	const char *errMsg = NULL;
-	
-	//Patching dofile function & I/O module
-	char* patch = "dofile = System.dofile\n\
-			 io.open = System.openFile\n\
-			 io.write = System.writeFile\n\
-			 io.close = System.closeFile\n\
-			 io.read = System.readFile\n\
-			 io.size = System.getFileSize";
-	luaL_loadbuffer(L, patch, strlen(patch), NULL); 
-	lua_KFunction dofilecont = (lua_KFunction)(lua_gettop(L) - 1);
-	lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
-	
-	if(!isStringBuffer) 
-		s = luaL_loadfile(L, script);
-	else 
-		s = luaL_loadbuffer(L, script, strlen(script), NULL);
-		
-	if (s == 0) 
-	{
-		s = lua_pcall(L, 0, LUA_MULTRET, 0);
+    int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	Timer* src = (Timer*)luaL_checkinteger(L, 1);
+	#ifndef SKIP_ERROR_HANDLING
+		if (src->magic != 0x4C544D52) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	if (src->isPlaying){
+		src->isPlaying = false;
+		src->tick = (osGetTime()-src->tick);
 	}
-	if (s) 
-	{
-		errMsg = lua_tostring(L, -1);
-		printf("error: %s\n", lua_tostring(L, -1));
-		lua_pop(L, 1); // remove error message
+	return 0;
+}
+
+static int lua_resume(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	Timer* src = (Timer*)luaL_checkinteger(L, 1);
+	#ifndef SKIP_ERROR_HANDLING
+		if (src->magic != 0x4C544D52) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	if (!src->isPlaying){
+		src->isPlaying = true;
+		src->tick = (osGetTime()-src->tick);
 	}
-	lua_close(L);
-	
-	return errMsg;
+	return 0;
+}
+
+static int lua_reset(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	Timer* src = (Timer*)luaL_checkinteger(L, 1);
+	#ifndef SKIP_ERROR_HANDLING
+		if (src->magic != 0x4C544D52) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	if (src->isPlaying) src->tick = osGetTime();
+	else src->tick = 0;
+	return 0;
+}
+
+static int lua_wisPlaying(lua_State *L){
+int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	Timer* src = (Timer*)luaL_checkinteger(L, 1);
+	#ifndef SKIP_ERROR_HANDLING
+		if (src->magic != 0x4C544D52) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	lua_pushboolean(L, src->isPlaying);
+	return 1;
+}
+
+static int lua_destroy(lua_State *L) {
+    int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+    Timer* timer = (Timer*)luaL_checkinteger(L,1);
+	#ifndef SKIP_ERROR_HANDLING
+		if (timer->magic != 0x4C544D52) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	free(timer);
+    return 1;
+}
+
+//Register our Timer Functions
+static const luaL_Reg Timer_functions[] = {
+  {"new",							lua_newT},
+  {"getTime",						lua_time},
+  {"destroy",						lua_destroy},
+  {"pause",							lua_pause},
+  {"resume",						lua_resume},
+  {"reset",							lua_reset},
+  {"isPlaying",						lua_wisPlaying},
+  {0, 0}
+};
+
+void luaTimer_init(lua_State *L) {
+	lua_newtable(L);
+	luaL_setfuncs(L, Timer_functions, 0);
+	lua_setglobal(L, "Timer");
 }

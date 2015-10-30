@@ -39,6 +39,8 @@
 #include <3ds.h>
 #include "Graphics.h"
 #include "font.h"
+#include "../lodepng/lodepng.h"
+#include "../libjpeg/jpeglib.h"
 #include <setjmp.h>
 
 #define CONFIG_3D_SLIDERSTATE (*(float*)0x1FF81080)
@@ -1201,6 +1203,113 @@ void DrawGpuLine(int x0, int y0, int x1, int y1, u32 color, int screen)
     }
 }
 
+Bitmap* loadPng(const char* filename)
+{
+	Handle fileHandle;
+	Bitmap* result;
+	u64 size;
+	u32 bytesRead;
+	unsigned char* out;
+	unsigned char* in;
+	unsigned int w, h;
+	
+	FS_path filePath = FS_makePath(PATH_CHAR, filename);
+	FS_archive archive = (FS_archive) { ARCH_SDMC, (FS_path) { PATH_EMPTY, 1, (u8*)"" }};
+	FSUSER_OpenFileDirectly(NULL, &fileHandle, archive, filePath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
+	
+	FSFILE_GetSize(fileHandle, &size);
+	
+	in = (unsigned char*)malloc(size);
+	
+	if(!in) {
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		return 0;
+	}
+	
+	FSFILE_Read(fileHandle, &bytesRead, 0x00, in, size);
+	FSFILE_Close(fileHandle);
+	svcCloseHandle(fileHandle);
+		
+		if(lodepng_decode32(&out, &w, &h, in, size) != 0) {
+			free(in);
+			return 0;
+		}
+	
+	free(in);
+	
+	result = (Bitmap*)malloc(sizeof(Bitmap));
+	if(!result) {
+		free(out);
+	}
+	
+	result->pixels = out;
+	result->width = w;
+	result->height = h;
+	result->bitperpixel = 32;
+	
+	u8* flipped = (u8*)malloc(w*h*4);
+	flipped = flipBitmap(flipped, result);
+	u32 i = 0;
+	while (i < (w*h*4)){
+	u8 tmp = flipped[i];
+	flipped[i] = flipped[i+2];
+	flipped[i+2] = tmp;
+	i=i+4;
+	}
+	free(out);
+	result->pixels = flipped;
+	
+	return result;
+}
+
+Bitmap* decodePNGfile(const char* filename)
+{
+	Handle fileHandle;
+	Bitmap* result;
+	u64 size;
+	u32 bytesRead;
+	unsigned char* out;
+	unsigned char* in;
+	unsigned int w, h;
+	
+	FS_path filePath = FS_makePath(PATH_CHAR, filename);
+	FS_archive archive = (FS_archive) { ARCH_SDMC, (FS_path) { PATH_EMPTY, 1, (u8*)"" }};
+	FSUSER_OpenFileDirectly(NULL, &fileHandle, archive, filePath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
+	
+	FSFILE_GetSize(fileHandle, &size);
+	
+	in = (unsigned char*)malloc(size);
+	
+	if(!in) {
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		return 0;
+	}
+	
+	FSFILE_Read(fileHandle, &bytesRead, 0x00, in, size);
+	FSFILE_Close(fileHandle);
+	svcCloseHandle(fileHandle);
+		
+		if(lodepng_decode32(&out, &w, &h, in, size) != 0) {
+			free(in);
+			return 0;
+		}
+	
+	free(in);
+	
+	result = (Bitmap*)malloc(sizeof(Bitmap));
+	if(!result) {
+		free(out);
+	}
+	
+	result->pixels = out;
+	result->width = w;
+	result->height = h;
+	result->bitperpixel = 32;
+	return result;
+}
+
 void linecpy(u8* screen,u16 x,u16 y,u16 width,u16 height, u8* image,u16 x_img,u16 y_img){
 	for (int i=y_img; i<y_img+height; i++){
 		for (int j=x_img; j<x_img+width; j++){
@@ -1219,6 +1328,124 @@ void RAW2FB(int xp,int yp, Bitmap* result,int screen,int side){
 	}else if (screen == 1) buffer = BottomFB;
 	int x=0, y=0;
 	linecpy(buffer,xp,yp,result->width,result->height, result->pixels,x,y);
+}
+
+struct my_error_mgr {
+struct jpeg_error_mgr pub;
+jmp_buf setjmp_buffer;
+};
+typedef struct my_error_mgr * my_error_ptr;
+METHODDEF(void)
+my_error_exit (j_common_ptr cinfo)
+{
+my_error_ptr myerr = (my_error_ptr) cinfo->err;
+(*cinfo->err->output_message) (cinfo);
+longjmp(myerr->setjmp_buffer, 1);
+}
+
+Bitmap* OpenJPG(const char* filename)
+{
+    Bitmap* result = (Bitmap*)malloc(sizeof(Bitmap));
+	if (result == NULL) return 0;
+	u64 size;
+	u32 bytesRead;
+	Handle fileHandle;
+    struct jpeg_decompress_struct cinfo;
+	struct my_error_mgr jerr;
+	cinfo.err = jpeg_std_error(&jerr.pub);
+    jerr.pub.error_exit = my_error_exit;
+    jpeg_create_decompress(&cinfo);
+	FS_path filePath = FS_makePath(PATH_CHAR, filename);
+	FS_archive archive = (FS_archive) { ARCH_SDMC, (FS_path) { PATH_EMPTY, 1, (u8*)"" }};
+	FSUSER_OpenFileDirectly(NULL, &fileHandle, archive, filePath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);	
+	FSFILE_GetSize(fileHandle, &size);
+	unsigned char* in = (unsigned char*)malloc(size);
+	if(!in) {
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		return 0;
+	}
+	FSFILE_Read(fileHandle, &bytesRead, 0x00, in, size);
+	FSFILE_Close(fileHandle);
+	svcCloseHandle(fileHandle);
+    jpeg_mem_src(&cinfo, in, size);
+    jpeg_read_header(&cinfo, TRUE);
+    jpeg_start_decompress(&cinfo);
+    int width = cinfo.output_width;
+    int height = cinfo.output_height;
+    int row_bytes = width * cinfo.num_components;
+    u8* bgr_buffer = (u8*) malloc(width*height*cinfo.num_components);
+    while (cinfo.output_scanline < cinfo.output_height) {
+        u8* buffer_array[1];
+        buffer_array[0] = bgr_buffer + (cinfo.output_scanline) * row_bytes;
+        jpeg_read_scanlines(&cinfo, buffer_array, 1);
+    }
+    jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+    result->bitperpixel = 24;
+    result->width = width;
+    result->height = height;
+    result->pixels = bgr_buffer;
+	u8* flipped = (u8*)malloc(width*height*3);
+	flipped = flipBitmap(flipped, result);
+	free(bgr_buffer);
+	free(in);
+	result->pixels = flipped;
+    return result;
+}
+
+Bitmap* decodeJPGfile(const char* filename)
+{
+    Bitmap* result = (Bitmap*)malloc(sizeof(Bitmap));
+	if (result == NULL) return 0;
+	u64 size;
+	u32 bytesRead;
+	Handle fileHandle;
+    struct jpeg_decompress_struct cinfo;
+	struct my_error_mgr jerr;
+	cinfo.err = jpeg_std_error(&jerr.pub);
+    jerr.pub.error_exit = my_error_exit;
+    jpeg_create_decompress(&cinfo);
+	FS_path filePath = FS_makePath(PATH_CHAR, filename);
+	FS_archive archive = (FS_archive) { ARCH_SDMC, (FS_path) { PATH_EMPTY, 1, (u8*)"" }};
+	FSUSER_OpenFileDirectly(NULL, &fileHandle, archive, filePath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);	
+	FSFILE_GetSize(fileHandle, &size);
+	unsigned char* in = (unsigned char*)malloc(size);
+	if(!in) {
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		return 0;
+	}
+	FSFILE_Read(fileHandle, &bytesRead, 0x00, in, size);
+	FSFILE_Close(fileHandle);
+	svcCloseHandle(fileHandle);
+    jpeg_mem_src(&cinfo, in, size);
+    jpeg_read_header(&cinfo, TRUE);
+    jpeg_start_decompress(&cinfo);
+    int width = cinfo.output_width;
+    int height = cinfo.output_height;
+    int row_bytes = width * cinfo.num_components;
+    u8* bgr_buffer = (u8*) malloc(width*height*cinfo.num_components);
+    while (cinfo.output_scanline < cinfo.output_height) {
+        u8* buffer_array[1];
+        buffer_array[0] = bgr_buffer + (cinfo.output_scanline) * row_bytes;
+        jpeg_read_scanlines(&cinfo, buffer_array, 1);
+    }
+    jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+    result->bitperpixel = 24;
+    result->width = width;
+    result->height = height;
+    result->pixels = bgr_buffer;
+	int i = 0;
+	while (i < (width*height*3)){
+		u8 tmp = result->pixels[i];
+		result->pixels[i] = result->pixels[i+2];
+		result->pixels[i+2] = tmp;
+		i=i+3;
+	}
+	free(in);
+    return result;
 }
 
 Bitmap* decodeBMPfile(const char* fname){
@@ -1257,4 +1484,59 @@ Bitmap* decodeBMPfile(const char* fname){
 	}
 	
 	return result;
+}
+
+Bitmap* decodeJpg(unsigned char* in,u64 size)
+{
+    Bitmap* result = (Bitmap*)malloc(sizeof(Bitmap));
+    struct jpeg_decompress_struct cinfo;
+	struct my_error_mgr jerr;
+	cinfo.err = jpeg_std_error(&jerr.pub);
+    jerr.pub.error_exit = my_error_exit;
+    jpeg_create_decompress(&cinfo);
+    jpeg_mem_src(&cinfo, in, size);
+    jpeg_read_header(&cinfo, TRUE);
+    jpeg_start_decompress(&cinfo);
+    int width = cinfo.output_width;
+    int height = cinfo.output_height;
+    int row_bytes = width * cinfo.num_components;
+    u8* bgr_buffer = (u8*) malloc(width*height*cinfo.num_components);
+    while (cinfo.output_scanline < cinfo.output_height) {
+        u8* buffer_array[1];
+        buffer_array[0] = bgr_buffer + (cinfo.output_scanline) * row_bytes;
+        jpeg_read_scanlines(&cinfo, buffer_array, 1);
+    }
+    jpeg_finish_decompress(&cinfo);
+    jpeg_destroy_decompress(&cinfo);
+    result->bitperpixel = 24;
+    result->width = width;
+    result->height = height;
+    result->pixels = bgr_buffer;
+    return result;
+}
+
+void saveJpg(char *filename, u32 *pixels, u32 width, u32 height){
+	FILE *outfile = fopen(filename, "wb");
+	struct jpeg_error_mgr jerr;
+	struct jpeg_compress_struct cinfo;
+	JSAMPROW row_pointer[1];
+	cinfo.err = jpeg_std_error(&jerr);
+	jpeg_create_compress(&cinfo);
+	jpeg_stdio_dest(&cinfo, outfile);
+	cinfo.image_width = width;
+	cinfo.image_height = height;
+	cinfo.input_components = 3;
+	cinfo.in_color_space = JCS_RGB;
+	jpeg_set_defaults(&cinfo);
+	cinfo.num_components = 3;
+	cinfo.dct_method = JDCT_FLOAT;
+	jpeg_set_quality(&cinfo, 100, TRUE);
+	jpeg_start_compress(&cinfo, TRUE);
+	while( cinfo.next_scanline < cinfo.image_height ){
+		row_pointer[0] = (unsigned char*)&pixels[ (cinfo.next_scanline * cinfo.image_width * cinfo.input_components) / 4];
+		jpeg_write_scanlines( &cinfo, row_pointer, 1 );
+	}
+	jpeg_finish_compress( &cinfo );
+	jpeg_destroy_compress( &cinfo );
+	fclose(outfile);
 }

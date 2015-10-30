@@ -38,6 +38,7 @@
 #include <3ds.h>
 #include "include/luaplayer.h"
 #include "include/graphics/Graphics.h"
+#include "include/ttf/Font.hpp"
 
 #define stringify(str) #str
 #define VariableRegister(lua, value) do { lua_pushinteger(lua, value); lua_setglobal (lua, stringify(value)); } while(0)
@@ -45,6 +46,7 @@
 
 struct ttf{
 	u32 magic;
+	Font f;
 	unsigned char* buffer;
 };
 
@@ -101,6 +103,40 @@ static int lua_get3D(lua_State *L)
     int argc = lua_gettop(L);
     if (argc != 0) return luaL_error(L, "wrong number of arguments");
 	lua_pushnumber(L, CONFIG_3D_SLIDERSTATE);
+	return 1;
+}
+
+static int lua_loadimg(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	char* text = (char*)(luaL_checkstring(L, 1));
+	Handle fileHandle;
+	u32 bytesRead;
+	u16 magic;
+	u64 long_magic;
+	FS_path filePath=FS_makePath(PATH_CHAR, text);
+	FS_archive script=(FS_archive){ARCH_SDMC, (FS_path){PATH_EMPTY, 1, (u8*)""}};
+	FSUSER_OpenFileDirectly(NULL, &fileHandle, script, filePath, FS_OPEN_READ, FS_ATTRIBUTE_NONE);
+	FSFILE_Read(fileHandle, &bytesRead, 0, &magic, 2);
+	Bitmap *bitmap;
+	if (magic == 0x5089){
+		FSFILE_Read(fileHandle, &bytesRead, 0, &long_magic, 8);
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		if (long_magic == 0x0A1A0A0D474E5089) bitmap = loadPng(text);
+	}else if (magic == 0x4D42){
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		bitmap = LoadBitmap(text);
+	}else if (magic == 0xD8FF){
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		bitmap = OpenJPG(text);
+	}
+	if(!bitmap) return luaL_error(L, "Error loading image");
+	bitmap->magic = 0x4C494D47;
+    lua_pushinteger(L, (u32)(bitmap));
 	return 1;
 }
 
@@ -203,6 +239,74 @@ static int lua_flipBitmap(lua_State *L)
 	dst->width = src->width;
 	dst->height = src->height;
 	free(not_flipped);
+	return 0;
+}
+
+static int lua_saveimg(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 3) return luaL_error(L, "wrong number of arguments");
+	Bitmap* src = (Bitmap*)luaL_checkinteger(L, 1);
+	char* text = (char*)(luaL_checkstring(L, 2));
+	#ifndef SKIP_ERROR_HANDLING
+		if (src->magic != 0x4C494D47) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	int compression = lua_toboolean(L, 3);
+	if (compression == 0){ //BMP Format
+		Handle fileHandle;
+		FS_archive sdmcArchive=(FS_archive){ARCH_SDMC, (FS_path){PATH_EMPTY, 1, (u8*)""}};
+		FS_path filePath=FS_makePath(PATH_CHAR, text);
+		Result ret=FSUSER_OpenFileDirectly(NULL, &fileHandle, sdmcArchive, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, FS_ATTRIBUTE_NONE);
+		if(ret) return luaL_error(L, "error opening file");
+		u32 bytesWritten;
+		u8 moltiplier = src->bitperpixel / 8;
+		u8* tempbuf = (u8*)malloc(0x36+(src->width)*(src->height)*moltiplier);
+		memset(tempbuf, 0, 0x36+(src->width)*(src->height)*moltiplier);
+		tempbuf[0x36+(src->width)*(src->height)*moltiplier]=0;
+		FSFILE_SetSize(fileHandle, (u16)(0x36+(src->width)*(src->height)*moltiplier));
+		*(u16*)&tempbuf[0x0] = 0x4D42;
+		*(u32*)&tempbuf[0x2] = 0x36 + (src->width)*(src->height)*moltiplier;
+		*(u32*)&tempbuf[0xA] = 0x36;
+		*(u32*)&tempbuf[0xE] = 0x28;
+		*(u32*)&tempbuf[0x12] = src->width;
+		*(u32*)&tempbuf[0x16] = src->height;
+		if (moltiplier == 3) *(u32*)&tempbuf[0x1A] = 0x00180001;
+		else *(u32*)&tempbuf[0x1A] = 0x00200001;
+		*(u32*)&tempbuf[0x22] = (src->width)*(src->height)*moltiplier;
+		int i=0;
+		while (i<((src->width)*(src->height)*moltiplier)){
+			tempbuf[0x36+i] = src->pixels[i];
+			i++;
+		}
+		FSFILE_Write(fileHandle, &bytesWritten, 0, (u32*)tempbuf, 0x36 + (src->width)*(src->height)*moltiplier, 0x10001);
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		free(tempbuf);
+	}else{ // JPG Format
+		u8 moltiplier = src->bitperpixel / 8;
+		u8* flip_pixels = (u8*)malloc((src->width)*(src->height)*moltiplier);
+		flip_pixels = flipBitmap(flip_pixels, src);
+		if (moltiplier == 4){ // 32bpp image - Need to delete alpha channel
+			u8* tmp = flip_pixels;
+			flip_pixels = (u8*)malloc((src->width)*(src->height)*3);
+			u32 i = 0;
+			u32 j = 0;
+			while ((i+1) < ((src->width)*(src->height)*(moltiplier))){
+				flip_pixels[j++] = tmp[i];
+				flip_pixels[j++] = tmp[i+1];
+				flip_pixels[j++] = tmp[i+2];
+				i = i + 4;
+			}
+			free(tmp);
+		}
+		sdmcInit();
+		char tmpPath2[1024];
+		strcpy(tmpPath2,"sdmc:");
+		strcat(tmpPath2,(char*)text);
+		saveJpg(tmpPath2,(u32*)flip_pixels,src->width,src->height);
+		free(flip_pixels);
+		sdmcExit();
+	}
 	return 0;
 }
 
@@ -568,6 +672,78 @@ static int lua_conappend(lua_State *L) {
     return 0;
 }
 
+static int lua_loadFont(lua_State *L) {
+    int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	char* text = (char*)(luaL_checkstring(L, 1));
+	char tmpPath2[1024];
+	strcpy(tmpPath2,"sdmc:");
+	strcat(tmpPath2,(char*)text);
+	Font F;
+	sdmcInit();
+    unsigned char* buffer = F.loadFromFile(tmpPath2);
+	sdmcExit();
+	F.setSize(16);
+	ttf* result = (ttf*)malloc(sizeof(ttf));
+	result->buffer = buffer;
+	result->f = F;
+	result->magic = 0x4C464E54;
+	lua_pushinteger(L,(u32)result);
+    return 1;
+}
+
+static int lua_fsize(lua_State *L) {
+    int argc = lua_gettop(L);
+    if (argc != 2) return luaL_error(L, "wrong number of arguments");
+	ttf* font = (ttf*)(luaL_checkinteger(L, 1));
+	u8 size = luaL_checkinteger(L,2);
+	#ifndef SKIP_ERROR_HANDLING
+		if (font->magic != 0x4C464E54) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	font->f.setSize(size);
+    return 0;
+}
+
+static int lua_unloadFont(lua_State *L) {
+    int argc = lua_gettop(L);
+    if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	ttf* font = (ttf*)(luaL_checkinteger(L, 1));
+	#ifndef SKIP_ERROR_HANDLING
+		if (font->magic != 0x4C464E54) return luaL_error(L, "attempt to access wrong memory block type");
+	#endif
+	free(font->buffer);
+	free(font);
+    return 0;
+}
+
+static int lua_fprint(lua_State *L) {
+    int argc = lua_gettop(L);
+    if (argc != 6 && argc != 7) return luaL_error(L, "wrong number of arguments");
+	ttf* font = (ttf*)(luaL_checkinteger(L, 1));
+	int x = luaL_checkinteger(L, 2);
+    int y = luaL_checkinteger(L, 3);
+	char* text = (char*)(luaL_checkstring(L, 4));
+	u32 color = luaL_checkinteger(L,5);
+	int screen = luaL_checkinteger(L,6);
+	int side=0;
+	if (argc == 7) side = luaL_checkinteger(L,7);
+	#ifndef SKIP_ERROR_HANDLING
+		if (font->magic != 0x4C464E54) return luaL_error(L, "attempt to access wrong memory block type");
+		if ((x < 0) || (y < 0)) return luaL_error(L, "out of bounds");
+		if ((screen == 0) && (x > 400)) return luaL_error(L, "out of framebuffer bounds");
+		if ((screen == 1) && (x > 320)) return luaL_error(L, "out of framebuffer bounds");
+		if ((screen <= 1) && (y > 227)) return luaL_error(L, "out of framebuffer bounds");
+		if (screen != 0 && screen != 1) return luaL_error(L, "wrong SCREEN value");
+	#endif
+	bool left_side = false;
+	bool top_screen = false;
+	if (screen == 0) top_screen = true;
+	if (side == 0) left_side = true;
+	font->f.drawString(x, y, text, Color((color >> 16) & 0xFF, (color >> 8) & 0xFF, (color) & 0xFF), top_screen, left_side);
+	gfxFlushBuffers();
+    return 0;
+}
+
 //Register our Console Functions
 static const luaL_Reg Console_functions[] = {
   {"new",                				lua_console},
@@ -602,10 +778,12 @@ static const luaL_Reg Screen_functions[] = {
   {"enable3D",						lua_enable3D},
   {"get3DLevel",					lua_get3D},
   {"disable3D",						lua_disable3D},
+  {"loadImage",						lua_loadimg},
   {"drawImage",						lua_pbitmap},
   {"freeImage",						lua_free},
   {"flipImage",						lua_flipBitmap},
   {"createImage",					lua_newBitmap},
+  {"saveImage",						lua_saveimg},
   {"getImageWidth",					lua_getWidth},
   {"getImageHeight",				lua_getHeight},  
   {"drawPartialImage",				lua_partial},  
@@ -613,10 +791,22 @@ static const luaL_Reg Screen_functions[] = {
   {0, 0}
 };
 
+//Register our Font Functions
+static const luaL_Reg Font_functions[] = {
+  {"load",					lua_loadFont}, 
+  {"print",					lua_fprint}, 
+  {"setPixelSizes",			lua_fsize}, 
+  {"unload",				lua_unloadFont}, 
+  {0, 0}
+};
+
 void luaScreen_init(lua_State *L) {
 	lua_newtable(L);
 	luaL_setfuncs(L, Screen_functions, 0);
 	lua_setglobal(L, "Screen");
+	lua_newtable(L);
+	luaL_setfuncs(L, Font_functions, 0);
+	lua_setglobal(L, "Font");
 	lua_newtable(L);
 	luaL_setfuncs(L, Color_functions, 0);
 	lua_setglobal(L, "Color");

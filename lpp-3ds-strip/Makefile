@@ -37,9 +37,9 @@ SOURCES		:=	source/include/lua	source source/include source/include/graphics \
 DATA		:=	data
 INCLUDES	:=	include
 
-APP_TITLE	:=	Masher's Grid Launcher Update
-APP_AUTHOR	:=	mashers/ihaveamac
-APP_DESCRIPTION	:=	Get the latest launcher!
+APP_TITLE	:=	Lua Player Plus
+APP_AUTHOR	:=	Rinnegatamante
+APP_DESCRIPTION	:=	Lua Interpreter for 3DS
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------

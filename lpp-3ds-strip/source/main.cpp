@@ -37,6 +37,7 @@
 #include "include/luaplayer.h"
 #include "include/graphics/Graphics.h"
 #include "include/ftp/ftp.h"
+#include "include/khax/khax.h"
 
 const char *errMsg;
 unsigned char *buffer;
@@ -70,6 +71,16 @@ int main(int argc, char **argv)
 	u64 size;
 	u32 bytesRead;
 	int restore;
+	
+	// Check user build and enables kernel access
+		if (nsInit()==0){
+			CIA_MODE = true;
+			nsExit();
+		}else CIA_MODE = false;
+		isNinjhax2 = false;
+		if (!hbInit()) khaxInit();
+		else isNinjhax2 = true;
+	
 	
 	// Set main script
 	char path[256];
@@ -177,6 +188,7 @@ int main(int argc, char **argv)
 			break;
 		}
 	}
+	if (!CIA_MODE) khaxExit();
 	fsExit();
 	irrstExit();
 	hidExit();

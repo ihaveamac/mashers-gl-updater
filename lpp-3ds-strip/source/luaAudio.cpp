@@ -24,75 +24,56 @@
 #-----------------------------------------------------------------------------------------------------------------------#
 #- Credits : -----------------------------------------------------------------------------------------------------------#
 #-----------------------------------------------------------------------------------------------------------------------#
-#- Smealum for ctrulib and ftpony src ----------------------------------------------------------------------------------#
+#- Smealum for ctrulib -------------------------------------------------------------------------------------------------#
 #- StapleButter for debug font -----------------------------------------------------------------------------------------#
 #- Lode Vandevenne for lodepng -----------------------------------------------------------------------------------------#
 #- Jean-loup Gailly and Mark Adler for zlib ----------------------------------------------------------------------------#
 #- Special thanks to Aurelio for testing, bug-fixing and various help with codes and implementations -------------------#
 #-----------------------------------------------------------------------------------------------------------------------*/
 
-#include <ctype.h>
-#include <errno.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <string.h>
+#include <unistd.h>
 #include <3ds.h>
-#include "include/luaplayer.h"
-#include "include/khax/khax.h"
+#include "include/luaAudio.h"
 
-static lua_State *L;
-bool isCSND;
+/* Custom CSND_playsound: 
+ - Prevent audio desynchronization for Video module
+ - Enable stereo sounds
+ - Add ADPCM codec support
+*/
+void My_CSND_playsound(u32 chn, u32 flags, u32 sampleRate, u32 *data0, u32 *data1, u32 size, float vol, float pan){
+	u32 paddr0 = 0, paddr1 = 0;
 
-const char *runScript(const char* script, bool isStringBuffer)
-{
-	L = luaL_newstate();
-	
-	// Standard libraries
-	luaL_openlibs(L);
-	isCSND = false;
-	
-	// Modules
-	luaSystem_init(L);
-	luaScreen_init(L);
-	luaGraphics_init(L);
-	luaControls_init(L);
-	luaNetwork_init(L);
-	luaTimer_init(L);
-	luaSound_init(L);
-	luaVideo_init(L);
-	
-	int s = 0;
-	const char *errMsg = NULL;
-	
-	//Patching dofile function & I/O module
-	char* patch = "dofile = System.dofile\n\
-			 io.open = System.openFile\n\
-			 io.write = System.writeFile\n\
-			 io.close = System.closeFile\n\
-			 io.read = System.readFile\n\
-			 io.size = System.getFileSize";
-	luaL_loadbuffer(L, patch, strlen(patch), NULL); 
-	lua_KFunction dofilecont = (lua_KFunction)(lua_gettop(L) - 1);
-	lua_callk(L, 0, LUA_MULTRET, 0, dofilecont);
-	
-	if(!isStringBuffer) 
-		s = luaL_loadfile(L, script);
-	else 
-		s = luaL_loadbuffer(L, script, strlen(script), NULL);
-		
-	if (s == 0) 
+	int encoding = (flags >> 12) & 3;
+	int loopMode = (flags >> 10) & 3;
+
+	if (encoding != CSND_ENCODING_PSG)
 	{
-		s = lua_pcall(L, 0, LUA_MULTRET, 0);
+		if (data0) paddr0 = osConvertVirtToPhys((u32)data0);
+		if (data1) paddr1 = osConvertVirtToPhys((u32)data1);
+
+		if (encoding == CSND_ENCODING_ADPCM)
+		{
+			int adpcmSample = ((s16*)data0)[-2];
+			int adpcmIndex = ((u8*)data0)[-2];
+			CSND_SetAdpcmState(chn, 0, adpcmSample, adpcmIndex);
+		}
 	}
-	if (s) 
+
+	u32 timer = CSND_TIMER(sampleRate);
+	if (timer < 0x0042) timer = 0x0042;
+	else if (timer > 0xFFFF) timer = 0xFFFF;
+	flags &= ~0xFFFF001F;
+	flags |= SOUND_ENABLE | SOUND_CHANNEL(chn) | (timer << 16);
+
+	CSND_SetChnRegs(flags, paddr0, paddr1, size, CSND_VOL(vol, pan), 0);
+
+	if (loopMode == CSND_LOOPMODE_NORMAL && paddr1 > paddr0)
 	{
-		errMsg = lua_tostring(L, -1);
-		printf("error: %s\n", lua_tostring(L, -1));
-		lua_pop(L, 1); // remove error message
+		// Now that the first block is playing, configure the size of the subsequent blocks
+		size -= paddr1 - paddr0;
+		CSND_SetBlock(chn, 1, paddr1, size);
 	}
-	lua_close(L);
 	
-	return errMsg;
 }

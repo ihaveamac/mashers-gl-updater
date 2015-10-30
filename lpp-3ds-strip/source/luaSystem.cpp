@@ -190,6 +190,115 @@ static int lua_getRegion(lua_State *L)
 	return 1;
 }
 
+static int lua_screenshot(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 2) return luaL_error(L, "wrong number of arguments");
+	const char *screenpath = luaL_checkstring(L, 1);
+	int compression = lua_toboolean(L, 2);
+	Handle fileHandle;
+	int x, y;
+	FS_archive sdmcArchive=(FS_archive){ARCH_SDMC, (FS_path){PATH_EMPTY, 1, (u8*)""}};
+	if (compression == 0){ //BMP Format
+		FS_path filePath=FS_makePath(PATH_CHAR, screenpath);
+		Result ret=FSUSER_OpenFileDirectly(NULL, &fileHandle, sdmcArchive, filePath, FS_OPEN_CREATE|FS_OPEN_WRITE, FS_ATTRIBUTE_NONE);
+		//if(ret) return luaL_error(L, "error opening file");
+		u32 bytesWritten;
+		u8* tempbuf = (u8*)malloc(0x36+576000);
+		memset(tempbuf, 0, 0x36+576000);
+		tempbuf[0x36+576000]=0;
+		FSFILE_SetSize(fileHandle, (u16)(0x36+576000));
+		*(u16*)&tempbuf[0x0] = 0x4D42;
+		*(u32*)&tempbuf[0x2] = 0x36 + 576000;
+		*(u32*)&tempbuf[0xA] = 0x36;
+		*(u32*)&tempbuf[0xE] = 0x28;
+		*(u32*)&tempbuf[0x12] = 400;
+		*(u32*)&tempbuf[0x16] = 480;
+		*(u32*)&tempbuf[0x1A] = 0x00180001;
+		*(u32*)&tempbuf[0x22] = 576000;
+		u8* framebuf = (u8*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
+		for (y = 0; y < 240; y++){
+			for (x = 0; x < 400; x++){
+				int si = ((239 - y) + (x * 240)) * 3;
+				int di = 0x36 + (x + ((479 - y) * 400)) * 3;
+				tempbuf[di++] = framebuf[si++];
+				tempbuf[di++] = framebuf[si++];
+				tempbuf[di++] = framebuf[si++];
+			}	
+		}
+		framebuf = (u8*)gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL);
+		for (y = 0; y < 240; y++){
+			for (x = 0; x < 320; x++){
+				int si = ((239 - y) + (x * 240)) * 3;
+				int di = 0x36 + ((x+40) + ((239 - y) * 400)) * 3;
+				tempbuf[di++] = framebuf[si++];
+				tempbuf[di++] = framebuf[si++];
+				tempbuf[di++] = framebuf[si++];
+			}
+			// Patch for wrong left/right borders colors
+			for (x = 0; x < 40; x++){
+				int di = 0x36 + (x + ((239 - y) * 400)) * 3;
+				tempbuf[di++] = 0;
+				tempbuf[di++] = 0;
+				tempbuf[di++] = 0;
+			}
+			for (x = 360; x < 400; x++){
+				int di = 0x36 + (x + ((239 - y) * 400)) * 3;
+				tempbuf[di++] = 0;
+				tempbuf[di++] = 0;
+				tempbuf[di++] = 0;
+			}
+		}
+		FSFILE_Write(fileHandle, &bytesWritten, 0, (u32*)tempbuf, 0x36 + 576000, 0x10001);
+		FSFILE_Close(fileHandle);
+		svcCloseHandle(fileHandle);
+		free(tempbuf);
+	}else{ // JPG Format
+		u8* tempbuf = (u8*)malloc(576000);
+		u8* framebuf = (u8*)gfxGetFramebuffer(GFX_TOP, GFX_LEFT, NULL, NULL);
+		for (y = 0; y < 240; y++){
+			for (x = 0; x < 400; x++){
+				int si = ((239 - y) + (x * 240)) * 3;
+				int di = (x + (y*400)) * 3;
+				tempbuf[di++] = framebuf[si++];
+				tempbuf[di++] = framebuf[si++];
+				tempbuf[di++] = framebuf[si++];
+			}	
+		}
+		framebuf = (u8*)gfxGetFramebuffer(GFX_BOTTOM, GFX_LEFT, NULL, NULL);
+		for (y = 0; y < 240; y++){
+			for (x = 0; x < 320; x++){
+				int si = ((239 - y) + (x * 240)) * 3;
+				int di = ((x+40) + ((y+240)*400)) * 3;
+				tempbuf[di++] = framebuf[si++];
+				tempbuf[di++] = framebuf[si++];
+				tempbuf[di++] = framebuf[si++];
+			}
+			// Patch for wrong left/right borders colors
+			for (x = 0; x < 40; x++){
+				int di = (x + ((y+240)*400)) * 3;
+				tempbuf[di++] = 0;
+				tempbuf[di++] = 0;
+				tempbuf[di++] = 0;
+			}
+			for (x = 360; x < 400; x++){
+				int di = (x + ((y+240)*400)) * 3;
+				tempbuf[di++] = 0;
+				tempbuf[di++] = 0;
+				tempbuf[di++] = 0;
+			}
+		}
+		sdmcInit();
+		char tmpPath2[1024];
+		strcpy(tmpPath2,"sdmc:");
+		strcat(tmpPath2,(char*)screenpath);
+		saveJpg(tmpPath2,(u32*)tempbuf,400,480);
+		sdmcExit();
+		free(tempbuf);
+	}
+	return 0;
+}
+
 static int lua_getsize(lua_State *L)
 {
     int argc = lua_gettop(L);
@@ -1259,6 +1368,7 @@ static const luaL_Reg System_functions[] = {
   {"getFirmware",			lua_getFW},
   {"getGWRomID",			lua_getcard},
   {"getKernel",				lua_getK},
+  {"takeScreenshot",		lua_screenshot},
   {"currentDirectory",		lua_curdir},
   {"checkBuild",			lua_checkbuild},
   {"renameDirectory",		lua_rendir},
