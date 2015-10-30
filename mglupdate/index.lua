@@ -8,7 +8,7 @@ boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.21", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.22", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(140, 140, 140), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
@@ -55,7 +55,6 @@ end
 
 function exit()
 	if not Controls.check(Controls.read(), KEY_ZL) then -- hold ZL to keep the temporary files
-		System.deleteFile(System.currentDirectory().."/tmp/state")
 		System.deleteDirectory(System.currentDirectory().."/tmp")
 	end
 	System.exit()
