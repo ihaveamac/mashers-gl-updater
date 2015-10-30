@@ -1,7 +1,6 @@
 <?php
 header('Content-Type: text/plain');
-header_remove('Content-Type');
-$result = "";
+$result = "test";
 if (file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt") == "DOWNLOADING") {
 	$result = "DOWNLOADING";
 } else {
@@ -19,7 +18,7 @@ if (file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt") == "DOWN
 		file_put_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate/state.txt", "READY");
 		$result = "READY:".$versionh_server;
 	} else {
-		$result = "READY:".$versionh_server;
+		$result = "READY:".$versionh_local;
 	}
 }
 echo $result;

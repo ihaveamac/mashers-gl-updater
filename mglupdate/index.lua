@@ -1,13 +1,13 @@
 dofile(System.currentDirectory().."/config.txt")
 
-getstatus_url = "http://ianburgwin.net/mglupdate/getstate.php"
+getstate_url = "http://ianburgwin.net/mglupdate/getstate.php"
 boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 -- as in README.md, https sites don't work in ctrulib, unless there's a workaround
 
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.11", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.12", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(255, 255, 255), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
@@ -90,7 +90,7 @@ function getServerState()
 	status, err = pcall(function()
 		System.deleteFile(System.currentDirectory().."/tmp/state")
 		-- Network.requestString did not seem to work properly.
-		Network.downloadFile(getstatus_url, System.currentDirectory().."/tmp/state")
+		Network.downloadFile(getstate_url, System.currentDirectory().."/tmp/state")
 		local tmp_s = io.open(System.currentDirectory().."/tmp/state", FREAD)
 		fullstate = io.read(tmp_s, 0, io.size(tmp_s))
 		io.close(tmp_s)
@@ -115,7 +115,7 @@ if Controls.check(Controls.read(), KEY_R) then
 else
 	updateState("errorversion")
 end
-updateState("downloading", state)
+updateState("downloading")
 Network.downloadFile(boot3dsx_url, System.currentDirectory().."/tmp/boot1.3dsx")
 System.deleteFile(boot3dsx_location)
 System.renameFile(System.currentDirectory().."/tmp/boot1.3dsx", boot3dsx_location)
