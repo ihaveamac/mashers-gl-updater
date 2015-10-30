@@ -4,10 +4,10 @@ getstatus_url = "http://ianburgwin.net/mglupdate/getstate.php"
 boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 -- as in README.md, https sites don't work in ctrulib, unless there's a workaround
 
-function updateState(stype, info, info2)
+function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.1", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.11", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(255, 255, 255), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
@@ -29,10 +29,9 @@ function updateState(stype, info, info2)
 			end
 		end
 	elseif stype == "showversion" then
-		Screen.debugPrint(5, 25, "(DEBUG) The latest beta is'"..info.."'", Color.new(255, 255, 255), TOP_SCREEN)
+		Screen.debugPrint(5, 25, "(DEBUG) Full result: "..info, Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.debugPrint(5, 45, "Press A to download & update", Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.debugPrint(5, 60, "Press B to exit", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 80, "Full result: "..info2, Color.new(255, 255, 255), TOP_SCREEN)
 		Screen.flip()
 		while true do
 			local pad = Controls.read()
@@ -76,16 +75,17 @@ end
 -- string.sub 29               ^
 -- this includes the space. this is intended.
 
+Screen.waitVblankStart()
+updateState("gettingver")
+
 -- seeing if this gives the networking stuff time to start up
 ti = Timer.new()
 Timer.resume(ti)
 while Timer.getTime(ti) <= 250 do end
 Timer.destroy(ti)
 
-Screen.waitVblankStart()
-updateState("gettingver")
 System.createDirectory(System.currentDirectory().."/tmp")
-state = "READY:#define currentversion <error>" -- substring would get <error> if something weird happened
+fullstate = "error error error error error<error>" -- substring would get <error> if something weird happened
 function getServerState()
 	status, err = pcall(function()
 		System.deleteFile(System.currentDirectory().."/tmp/state")
@@ -110,9 +110,8 @@ if state == "DOWNLOADING" then
 	Timer.destroy(ti)
 	getServerState()
 end
-sstate = string.sub(fullstate, 29)
 if Controls.check(Controls.read(), KEY_R) then
-	updateState("showversion", sstate, fullstate)
+	updateState("showversion", fullstate)
 else
 	updateState("errorversion")
 end
