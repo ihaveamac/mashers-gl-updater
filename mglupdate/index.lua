@@ -7,7 +7,7 @@ boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.04", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Update v1.05", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(255, 255, 255), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Getting latest version number", Color.new(255, 255, 255), TOP_SCREEN)
@@ -69,7 +69,7 @@ System.createDirectory(System.currentDirectory().."/tmp")
 state = "READY:#define currentversion <error>" -- substring would get <error> if something weird happened
 function getServerState()
 	status, err = pcall(function()
-		System.deleteFile(System.currentDirectory().."/tmp/status")
+		System.deleteFile(System.currentDirectory().."/tmp/state")
 		-- Network.requestString did not seem to work properly.
 		Network.downloadFile(getstatus_url, System.currentDirectory().."/tmp/state")
 		local tmp_s = io.open(System.currentDirectory().."/tmp/state", FREAD)
