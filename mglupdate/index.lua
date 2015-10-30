@@ -1,14 +1,14 @@
 dofile(System.currentDirectory().."/config.txt")
 
 getstate_url = "http://ianburgwin.net/mglupdate/updatestate.php"
-versionh_url = "http://ianburgwin.net/mglupdate/version.h"
+versionh_url = "http://ianburgwin.net/mglupdate/version.h2"
 boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 -- as in README.md, https sites don't work in ctrulib, unless there's a workaround, then nothing in "site" would be necessary
 
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.23a", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.23ab", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(140, 140, 140), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
