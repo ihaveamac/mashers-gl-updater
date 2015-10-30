@@ -8,7 +8,7 @@ boot3dsx_url = "http://ianburgwin.net/mglupdate/boot1.3dsx"
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.23ab", Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(5, 5, "mashers's Grid Launcher Updater v1.23abc", Color.new(255, 255, 255), TOP_SCREEN)
 	Screen.fillEmptyRect(0,399,17,18,Color.new(140, 140, 140), TOP_SCREEN)
 	if stype == "gettingver" then
 		Screen.debugPrint(5, 25, "Preparing", Color.new(255, 255, 255), TOP_SCREEN)
