@@ -8,7 +8,9 @@ The "site" part is meant to download and cache the latest version and boot1.3dsx
 This is mostly a stopgap until an updater is built into the launcher, though this is also included with the launcher when normally downloaded from GBAtemp. Some of this was quickly put together and not made to be easily changed for use in the future (it's not that hard though). The server-side code could definitely be optimized in some way, but it fits the purpose for the time being.
 
 ## How to use
-Place "mglupdate" in the /3ds folder, or anywhere you like.
+This updater can be added to the grid launcher's settings menu by placing mglupdate.3dsx, config.txt, and index.lua all in /gridlauncher/update
+
+Otherwise, extract it any place you like (e.g. /3ds/mglupdate)
 
 If your launcher is not at /boot.3dsx, edit config.txt to point it to the correct location.
 
