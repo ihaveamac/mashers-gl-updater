@@ -5,7 +5,7 @@ This program uses a modified Lua Player Plus by Rinnegatamante to greatly reduce
 
 The "site" part is meant to download and cache the latest version and boot1.3dsx from https://github.com/mashers/3ds_hb_menu. This is done because ctrulib can't seem to download from HTTPS sites (if there is a way, tell me and I'll forward it).
 
-This is mostly a stopgap until an updater is built into the launcher, though this is also included with the launcher when normally downloaded from GBAtemp. Some of this was quickly put together and not made to be easily changed for use in the future (it's not that hard though). The server-side code could definitely be optimized in some way, but it fits the purpose for the time being.
+Some of this was quickly put together and not made to be easily changed for use in the future (it's not that hard though). The server-side code could definitely be optimized in some way, but it fits the purpose for the time being.
 
 ## How to use
 This updater can be added to the grid launcher's settings menu by placing mglupdate.3dsx, config.txt, and index.lua all in /gridlauncher/update
