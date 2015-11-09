@@ -1,5 +1,6 @@
+**I have stopped working on this in the mean time, as mashers has taken a break from working on his launcher. Development will continue if he decides to continue.**
 # mashers's Grid Launcher Updater
-This program grabs the latest version of Masher's Homebrew Launcher with grid layout. You can check it out here: https://gbatemp.net/threads/release-homebrew-launcher-with-grid-layout.397527/
+This program grabs the latest version of mashers's Homebrew Launcher with grid layout. You can check it out here: https://gbatemp.net/threads/release-homebrew-launcher-with-grid-layout.397527/
 
 This program uses a modified Lua Player Plus by Rinnegatamante to greatly reduce filesize. It is based on [this commit](https://github.com/Rinnegatamante/lpp-3ds/tree/312125395509486ddac02512a3594f8a904ebb75). The source of this is in "lpp-3ds-strip".
 
