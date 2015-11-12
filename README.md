@@ -1,4 +1,3 @@
-**I have stopped working on this in the mean time, as mashers has taken a break from working on his launcher. Development will continue if he decides to continue.**
 # mashers's Grid Launcher Updater
 This program grabs the latest version of mashers's Homebrew Launcher with grid layout. You can check it out here: https://gbatemp.net/threads/release-homebrew-launcher-with-grid-layout.397527/
 
