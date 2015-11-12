@@ -37,9 +37,9 @@ SOURCES		:=	source/include/lua	source source/include source/include/graphics \
 DATA		:=	data
 INCLUDES	:=	include
 
-APP_TITLE	:=	Masher's Grid Launcher Update
-APP_AUTHOR	:=	mashers/ihaveamac
-APP_DESCRIPTION	:=	Get the latest launcher!
+APP_TITLE	:=	Grid Launcher Updater
+APP_AUTHOR	:=	ihaveamac
+APP_DESCRIPTION	:=	Get the latest version of the grid launcher, almost like magic.
 #---------------------------------------------------------------------------------
 # options for code generation
 #---------------------------------------------------------------------------------
