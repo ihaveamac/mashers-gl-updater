@@ -70,7 +70,15 @@ function updateState(stype, info)
 	-- show version and other information
 	elseif stype == "showversion" then
 		print(5, 25, "The latest version is "..info..".")
-		print(5, 25, ")
+		print(5, 40, "You have "..vp[2]..".")
+		print(5, 60, "The launcher will be updated at:")
+		print(5, 75, vp[1]:sub(7))
+		-- DEBUG
+		while true do
+			if Controls.check(Controls.read(), KEY_B) then
+				exit()
+			end
+		end
 	
 	-- the end!!!
 	end
