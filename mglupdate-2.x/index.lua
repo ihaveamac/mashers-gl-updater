@@ -17,6 +17,7 @@ for v in string.gmatch(io.read(vp_file, 0, io.size(vp_file)), '([^|]+)') do
 	table.insert(vp, v)
 end
 vp[1] = vp[1]:sub(6)
+vp[2] = vp[2]:sub(1, vp[2]:len() - 1)
 
 -- exit - hold L to keep the temporary files
 function exit()
