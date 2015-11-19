@@ -16,13 +16,5 @@ If your launcher is not at /boot.3dsx, edit config.txt to point it to the correc
 
 Run the program and the program will attempt to show you the latest version available. Press A to download and apply the update. The launcher will automatically exit once the new version is in place.
 
-## How it works
-* When the user opens the program, it sends a request to "getstate_url" (by default, http://ianburgwin.net/mglupdate/updatestate.php). This causes the server to check "version.h" at [this URL](https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/source/version.h)
-* If they match, the program will then download the contents of "versionh_url" (by default, http://ianburgwin.net/mglupdate/version.h) simply to display the version number on screen.
-* If they do not match, the server will download the newest version.h and boot1.3dsx (from [this URL](https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/boot1.3dsx)) and store it for downloading. Then the program continues like usual.
-* The location of the cached boot1.3dsx is at "boot3dsx_url" (by default, http://ianburgwin.net/mglupdate/boot1.3dsx).
-
-None of the server-side code would exist if there was an easy way to download content from https sites using ctrulib or something.
-
 # License
 The index.lua script is under the MIT license. Lua Player Plus is under the GPLv3 license.
