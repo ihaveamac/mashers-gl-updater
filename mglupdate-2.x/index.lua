@@ -15,6 +15,7 @@ vp = {}
 for v in string.gmatch(io.read(vp_file, 0, io.size(vp_file)), '([^|]+)') do
 	table.insert(vp, v)
 end
+vp[1] = vp[1]:sub(7)
 
 -- exit - hold ZL to keep the temporary files
 function exit()
@@ -24,25 +25,33 @@ function exit()
 	System.exit()
 end
 
+-- printing to screen function
+function print(x, y, text)
+	Screen.debugPrint(x, x, text, Color.new(255, 255, 255), TOP_SCREEN)
+end
+function drawLine()
+	Screen.fillEmptyRect(6,393,17,18,Color.new(155, 240, 255), TOP_SCREEN)
+end
+
 -- update information on screen
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
-	Screen.debugPrint(5, 5, "Grid Launcher Updater v2.0d", Color.new(255, 255, 255), TOP_SCREEN)
-	Screen.fillEmptyRect(6,393,17,18,Color.new(155, 240, 255), TOP_SCREEN)
+	print(5, 5, "Grid Launcher Updater v2.0d")
+	drawLine()
 	
 	-- getting latest information
 	if stype == "prepare" or stype == "cacheupdating" then
-		Screen.debugPrint(5, 25, "Please wait a moment.", Color.new(255, 255, 255), TOP_SCREEN)
+		print(5, 25, "Please wait a moment.")
 		Screen.flip()
 	
 	-- failed to get info, usually bad internet connection
 	elseif stype == "noconnection" then
-		Screen.debugPrint(5, 25, "Couldn't get the latest version!", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 40, "Check your connection to the Internet.", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 60, "If this problem persists, you might need to", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 75, "manually replace this updater.", Color.new(255, 255, 255), TOP_SCREEN)
-		Screen.debugPrint(5, 95, "B: exit", Color.new(255, 255, 255), TOP_SCREEN)
+		print(5, 25, "Couldn't get the latest version!")
+		print(5, 40, "Check your connection to the Internet.")
+		print(5, 60, "If this problem persists, you might need to")
+		print(5, 75, "manually replace this updater.")
+		print(5, 95, "B: exit")
 		co = Console.new(BOTTOM_SCREEN)
 		Console.append(co, info)
 		Console.show(co)
@@ -66,3 +75,4 @@ end)
 if not status then
 	updateState("noconnection", err)
 end
+updateState("noconnection", "worked")
