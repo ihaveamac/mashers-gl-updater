@@ -29,7 +29,7 @@ end
 
 -- delete directory contents (custom function)
 function deleteDirContents(dir)
-	local cont = System.listDirectory(cont)
+	local cont = System.listDirectory(dir)
 	for k, v in pairs(cont) do
 		if v.directory then
 			deleteDirContents(dir.."/"..v.name)
@@ -62,7 +62,7 @@ function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
 	Screen.clear(BOTTOM_SCREEN)
-	print(5, 5, "Grid Launcher Updater v2.0d")
+	print(5, 5, "Grid Launcher Updater v2.00")
 	
 	-- getting latest information
 	if stype == "prepare" or stype == "cacheupdating" then
@@ -98,7 +98,7 @@ function updateState(stype, info)
 		print(5, 60, "The grid launcher's location is:")
 		print(5, 75, vp[1])
 		print(5, 95, "If available, the updater will also be")
-		print(5, 110, "updated at `/gridlauncher/update`.")
+		print(5, 110, "updated at /gridlauncher/update.")
 		print(5, 150, "A: download and install")
 		print(5, 165, "B: exit")
 		Screen.flip()
@@ -115,6 +115,7 @@ function updateState(stype, info)
 		print(5, 40, "Extracting, sit tight!", Color.new(127, 127, 127))
 		print(5, 55, "Installing, this doesn't take long!", Color.new(127, 127, 127))
 		print(5, 70, "Done!", Color.new(127, 127, 127))
+		print(5, 110, "Do not turn off the power.")
 		Screen.flip()
 	
 	-- now comes the extraction
@@ -124,6 +125,7 @@ function updateState(stype, info)
 		print(5, 40, "Extracting, sit tight!")
 		print(5, 55, "Installing, this doesn't take long!", Color.new(127, 127, 127))
 		print(5, 70, "Done!", Color.new(127, 127, 127))
+		print(5, 110, "Do not turn off the power.")
 		Screen.flip()
 	
 	-- now comes the extraction
@@ -133,6 +135,7 @@ function updateState(stype, info)
 		print(5, 40, "Extracting, sit tight!", Color.new(127, 127, 127))
 		print(5, 55, "Installing, this doesn't take long!")
 		print(5, 70, "Done!", Color.new(127, 127, 127))
+		print(5, 110, "Do not turn off the power.")
 		Screen.flip()
 	
 	-- and we're all done
@@ -198,5 +201,18 @@ System.extractZIP(System.currentDirectory().."/tmp/launcher.zip", System.current
 
 -- install the files
 updateState("installing", state:sub(24))
---System.createDirectory("/gridlauncher/update")
---deleteDirContents("/gridlauncher/update")
+System.createDirectory("/gridlauncher/update")
+deleteDirContents("/gridlauncher/update")
+new_update = System.listDirectory(System.currentDirectory().."/tmp/gridlauncher/update")
+for k, v in pairs(new_update) do
+	if v.directory then
+		System.renameDirectory(System.currentDirectory().."/tmp/gridlauncher/update/"..v.name, "/gridlauncher/update/"..v.name)
+	else
+		System.renameFile(System.currentDirectory().."/tmp/gridlauncher/update/"..v.name, "/gridlauncher/update/"..v.name)
+	end
+end
+System.deleteFile(vp[1])
+System.renameFile(System.currentDirectory().."/tmp/boot.3dsx", vp[1])
+
+-- done!
+updateState("done", state:sub(24))
