@@ -17,9 +17,9 @@ for v in string.gmatch(io.read(vp_file, 0, io.size(vp_file)), '([^|]+)') do
 end
 vp[1] = vp[1]:sub(7)
 
--- exit - hold ZL to keep the temporary files
+-- exit - hold L to keep the temporary files
 function exit()
-	if not Controls.check(Controls.read(), KEY_ZL) then
+	if not Controls.check(Controls.read(), KEY_L) then
 		System.deleteDirectory(System.currentDirectory().."/tmp")
 	end
 	System.exit()
@@ -27,7 +27,10 @@ end
 
 -- printing to screen function
 function print(x, y, text)
-	Screen.debugPrint(x, x, text, Color.new(255, 255, 255), TOP_SCREEN)
+	Screen.debugPrint(x, y, text, Color.new(255, 255, 255), TOP_SCREEN)
+end
+function printb(x, y, text)
+	Screen.debugPrint(x, y, text, Color.new(255, 255, 255), BOTTOM_SCREEN)
 end
 function drawLine()
 	Screen.fillEmptyRect(6,393,17,18,Color.new(155, 240, 255), TOP_SCREEN)
@@ -37,6 +40,7 @@ end
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
+	Screen.clear(BOTTOM_SCREEN)
 	print(5, 5, "Grid Launcher Updater v2.0d")
 	drawLine()
 	
@@ -51,7 +55,8 @@ function updateState(stype, info)
 		print(5, 40, "Check your connection to the Internet.")
 		print(5, 60, "If this problem persists, you might need to")
 		print(5, 75, "manually replace this updater.")
-		print(5, 95, "B: exit")
+		print(5, 90, "github.com/ihaveamac/mashers-gl-updater")
+		print(5, 110, "B: exit")
 		co = Console.new(BOTTOM_SCREEN)
 		Console.append(co, info)
 		Console.show(co)
@@ -61,12 +66,20 @@ function updateState(stype, info)
 				exit()
 			end
 		end
+	
+	-- show version and other information
+	elseif stype == "showversion" then
+		print(5, 25, "The latest version is "..info..".")
+		print(5, 25, ")
+	
+	-- the end!!!
 	end
 end
 
 -- show preparing
 Screen.waitVblankStart()
 updateState("prepare")
+System.createDirectory(System.currentDirectory().."/tmp")
 
 -- check network connection and trigger actions on the server
 status, err = pcall(function()
@@ -76,3 +89,8 @@ if not status then
 	updateState("noconnection", err)
 end
 updateState("noconnection", "worked")
+fullstate = "error error error error<error>" -- substring would get <error> if something weird happened. should NEVER happen
+function getServerState()
+	fullstate = Network.requestString(versionh_url)
+end
+getServerState()
