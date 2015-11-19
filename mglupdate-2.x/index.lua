@@ -22,8 +22,8 @@ vp[2] = vp[2]:sub(1, vp[2]:len() - 1)
 -- exit - hold L to keep the temporary files
 function exit()
 	if not Controls.check(Controls.read(), KEY_L) then
-		deleteDirContents(System.currentDirectory().."/tmp")
-		System.deleteDirectory(System.currentDirectory().."/tmp")
+		deleteDirContents("/mgl_temp")
+		System.deleteDirectory("/mgl_temp")
 	end
 	System.exit()
 end
@@ -63,7 +63,7 @@ function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
 	Screen.clear(BOTTOM_SCREEN)
-	print(5, 5, "Grid Launcher Updater v2.00")
+	print(5, 5, "Grid Launcher Updater v2.01")
 	
 	-- getting latest information
 	if stype == "prepare" or stype == "cacheupdating" then
@@ -161,7 +161,7 @@ end
 -- show preparing
 Screen.waitVblankStart()
 updateState("prepare")
-System.createDirectory(System.currentDirectory().."/tmp")
+System.createDirectory("/mgl_temp")
 
 -- check network connection and trigger actions on the server
 status, err = pcall(function()
@@ -194,26 +194,26 @@ updateState("showversion", state:sub(24))
 
 -- download launcher.zip
 updateState("downloading", state:sub(24))
-Network.downloadFile(launcherzip_url, System.currentDirectory().."/tmp/launcher.zip")
+Network.downloadFile(launcherzip_url, "/mgl_temp/launcher.zip")
 
 -- extract launcher.zip
 updateState("extracting", state:sub(24))
-System.extractZIP(System.currentDirectory().."/tmp/launcher.zip", System.currentDirectory().."/tmp")
+System.extractZIP("/mgl_temp/launcher.zip", "/mgl_temp")
 
 -- install the files
 updateState("installing", state:sub(24))
 System.createDirectory("/gridlauncher/update")
 deleteDirContents("/gridlauncher/update")
-new_update = System.listDirectory(System.currentDirectory().."/tmp/gridlauncher/update")
+new_update = System.listDirectory("/mgl_temp/gridlauncher/update")
 for k, v in pairs(new_update) do
 	if v.directory then
-		System.renameDirectory(System.currentDirectory().."/tmp/gridlauncher/update/"..v.name, "/gridlauncher/update/"..v.name)
+		System.renameDirectory("/mgl_temp/gridlauncher/update/"..v.name, "/gridlauncher/update/"..v.name)
 	else
-		System.renameFile(System.currentDirectory().."/tmp/gridlauncher/update/"..v.name, "/gridlauncher/update/"..v.name)
+		System.renameFile("/mgl_temp/gridlauncher/update/"..v.name, "/gridlauncher/update/"..v.name)
 	end
 end
 System.deleteFile(vp[1])
-System.renameFile(System.currentDirectory().."/tmp/boot.3dsx", vp[1])
+System.renameFile("/mgl_temp/boot.3dsx", vp[1])
 
 -- done!
 updateState("done", state:sub(24))
