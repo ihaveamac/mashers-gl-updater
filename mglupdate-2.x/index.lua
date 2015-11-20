@@ -1,9 +1,6 @@
 --ihaveamac--
 -- updater issues go to https://github.com/ihaveamac/mashers-gl-updater/issues
 -- licensed under the MIT license: https://github.com/ihaveamac/mashers-gl-updater/blob/master/LICENSE.md
-System.deleteDirectory("/MUSIC")
--- just a note (no code changes) - this does not work if "MUSIC" has contents in it.
--- this was debug code I accidentally left in. but Sunshell users should be fine. ;)
 
 -- site urls
 getstate_url = "http://ianburgwin.net/mglupdate-2/updatestate.php"
@@ -60,31 +57,43 @@ function drawLine(clr)
 	Screen.fillEmptyRect(6, 393, 17, 18, clr, TOP_SCREEN)
 end
 
+-- credits
+function drawCredits()
+	printb(5, 40, "grid launcher by mashers", Color.new(127, 127, 127))
+	printb(10, 55, "gbatemp.net/threads/397527/", Color.new(127, 127, 127))
+	printb(5, 5, "updater by ihaveamac", Color.new(127, 127, 127))
+	printb(10, 20, "ianburgwin.net/mglupdate", Color.new(127, 127, 127))
+end
+
 -- update information on screen
 function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
 	Screen.clear(BOTTOM_SCREEN)
-	print(5, 5, "Grid Launcher Updater v2.01")
+	print(5, 5, "Grid Launcher Updater v2.02", Color.new(127, 127, 127))
+	print(5, 5, "Grid Launcher Updater")
+		drawCredits()
 	
 	-- getting latest information
 	if stype == "prepare" or stype == "cacheupdating" then
 		drawLine(Color.new(0, 0, 255))
+		drawCredits()
 		print(5, 25, "Please wait a moment.")
-		print(5, 40, "You have "..vp[2]..".")
+		print(5, 40, "You have "..vp[2]..".", Color.new(127, 127, 255))
+		print(5, 40, "You have")
 		Screen.flip()
 	
 	-- failed to get info, usually bad internet connection
 	elseif stype == "noconnection" then
 		drawLine(Color.new(255, 0, 0))
-		print(5, 25, "Couldn't get the latest version!")
+		drawCredits()
+		print(5, 25, "Couldn't get the latest version!", Color.new(255, 127, 127))
 		print(5, 40, "Check your connection to the Internet.")
 		print(5, 60, "If this problem persists, you might need to")
 		print(5, 75, "manually replace this updater.")
-		print(5, 90, "github.com/ihaveamac/mashers-gl-updater")
-		print(5, 130, "B: exit")
+		print(5, 115, "B: exit")
 		co = Console.new(BOTTOM_SCREEN)
-		Console.append(co, info)
+		Console.append(co, "\n\n\n\n\n"..info)
 		Console.show(co)
 		Screen.flip()
 		while true do
@@ -96,10 +105,13 @@ function updateState(stype, info)
 	-- show version and other information
 	elseif stype == "showversion" then
 		drawLine(Color.new(85, 85, 255))
-		print(5, 25, "The latest version is "..info..".")
-		print(5, 40, "You have "..vp[2]..".")
+		-- crappy workaround to highlight specific words
+		print(5, 25, "The latest version is "..info..".", Color.new(127, 127, 255))
+		print(5, 25, "The latest version is")
+		print(5, 40, "You have "..vp[2]..".", Color.new(127, 127, 255))
+		print(5, 40, "You have")
 		print(5, 60, "The grid launcher's location is:")
-		print(5, 75, vp[1])
+		print(5, 75, vp[1], Color.new(127, 127, 255))
 		print(5, 95, "If available, the updater will also be")
 		print(5, 110, "updated at /gridlauncher/update.")
 		print(5, 150, "A: download and install")
@@ -113,7 +125,7 @@ function updateState(stype, info)
 	
 	-- downloading launcher.zip
 	elseif stype == "downloading" then
-		drawLine(Color.new(170, 170, 255))
+		drawLine(Color.new(127, 255, 127))
 		print(5, 25, "Downloading "..info..", be patient!")
 		print(5, 40, "Extracting, sit tight!", Color.new(127, 127, 127))
 		print(5, 55, "Installing, this doesn't take long!", Color.new(127, 127, 127))
@@ -123,7 +135,7 @@ function updateState(stype, info)
 	
 	-- now comes the extraction
 	elseif stype == "extracting" then
-		drawLine(Color.new(170, 170, 255))
+		drawLine(Color.new(127, 255, 127))
 		print(5, 25, "Downloading "..info..", be patient!", Color.new(127, 127, 127))
 		print(5, 40, "Extracting, sit tight!")
 		print(5, 55, "Installing, this doesn't take long!", Color.new(127, 127, 127))
@@ -133,7 +145,7 @@ function updateState(stype, info)
 	
 	-- now comes the extraction
 	elseif stype == "installing" then
-		drawLine(Color.new(170, 170, 255))
+		drawLine(Color.new(127, 255, 127))
 		print(5, 25, "Downloading "..info..", be patient!", Color.new(127, 127, 127))
 		print(5, 40, "Extracting, sit tight!", Color.new(127, 127, 127))
 		print(5, 55, "Installing, this doesn't take long!")
