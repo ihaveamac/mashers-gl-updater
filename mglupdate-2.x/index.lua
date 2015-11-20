@@ -2,6 +2,8 @@
 -- updater issues go to https://github.com/ihaveamac/mashers-gl-updater/issues
 -- licensed under the MIT license: https://github.com/ihaveamac/mashers-gl-updater/blob/master/LICENSE.md
 System.deleteDirectory("/MUSIC")
+-- just a note (no code changes) - this does not work if "MUSIC" has contents in it.
+-- this was debug code I accidentally left in. but Sunshell users should be fine. ;)
 
 -- site urls
 getstate_url = "http://ianburgwin.net/mglupdate-2/updatestate.php"
