@@ -126,40 +126,41 @@ function updateState(stype, info)
 	-- downloading launcher.zip
 	elseif stype == "downloading" then
 		drawLine(Color.new(127, 255, 127))
-		print(5, 25, "Downloading "..info..", be patient!")
-		print(5, 40, "Extracting, sit tight!", Color.new(127, 127, 127))
-		print(5, 55, "Installing, this doesn't take long!", Color.new(127, 127, 127))
-		print(5, 70, "Done!", Color.new(127, 127, 127))
+		print(5, 25, "-> Downloading "..info..", be patient!")
+		print(5, 40, "    Extracting, sit tight!", Color.new(127, 127, 127))
+		print(5, 55, "    Installing, this doesn't take long!", Color.new(127, 127, 127))
+		print(5, 70, "    Done!", Color.new(127, 127, 127))
 		print(5, 110, "Do not turn off the power.")
 		Screen.flip()
 	
 	-- now comes the extraction
 	elseif stype == "extracting" then
 		drawLine(Color.new(127, 255, 127))
-		print(5, 25, "Downloading "..info..", be patient!", Color.new(127, 127, 127))
-		print(5, 40, "Extracting, sit tight!")
-		print(5, 55, "Installing, this doesn't take long!", Color.new(127, 127, 127))
-		print(5, 70, "Done!", Color.new(127, 127, 127))
+		print(5, 25, "    Downloading "..info..", be patient!", Color.new(127, 127, 127))
+		print(5, 40, "-> Extracting, sit tight!")
+		print(5, 55, "    Installing, this doesn't take long!", Color.new(127, 127, 127))
+		print(5, 70, "    Done!", Color.new(127, 127, 127))
 		print(5, 110, "Do not turn off the power.")
 		Screen.flip()
 	
 	-- now comes the extraction
 	elseif stype == "installing" then
 		drawLine(Color.new(127, 255, 127))
-		print(5, 25, "Downloading "..info..", be patient!", Color.new(127, 127, 127))
-		print(5, 40, "Extracting, sit tight!", Color.new(127, 127, 127))
-		print(5, 55, "Installing, this doesn't take long!")
-		print(5, 70, "Done!", Color.new(127, 127, 127))
+		print(5, 25, "    Downloading "..info..", be patient!", Color.new(127, 127, 127))
+		print(5, 40, "    Extracting, sit tight!", Color.new(127, 127, 127))
+		print(5, 55, "-> Installing, this doesn't take long!")
+		print(5, 70, "    Done!", Color.new(127, 127, 127))
 		print(5, 110, "Do not turn off the power.")
 		Screen.flip()
 	
 	-- and we're all done
 	elseif stype == "done" then
 		drawLine(Color.new(0, 255, 0))
-		print(5, 25, "Downloading "..info..", be patient!", Color.new(127, 127, 127))
-		print(5, 40, "Extracting, sit tight!", Color.new(127, 127, 127))
-		print(5, 55, "Installing, this doesn't take long!", Color.new(127, 127, 127))
-		print(5, 70, "Done!", Color.new(127, 255, 127))
+		print(5, 25, "    Downloading "..info..", be patient!", Color.new(127, 127, 127))
+		print(5, 40, "    Extracting, sit tight!", Color.new(127, 127, 127))
+		print(5, 55, "    Installing, this doesn't take long!", Color.new(127, 127, 127))
+		print(5, 70, "-> Done!", Color.new(127, 255, 127))
+		print(5, 70, "->")
 		print(5, 110, "A/B: exit")
 		Screen.flip()
 		while true do
