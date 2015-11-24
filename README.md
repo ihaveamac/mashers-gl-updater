@@ -7,14 +7,14 @@ The "site" part is meant to download and cache the last version number and launc
 
 Some of this was quickly put together and not made to be easily changed for use in the future (it's not that hard though). The server-side code could definitely be optimized in some way, but it fits the purpose for the time being.
 
+If you are setting up a custom updater, the `enable` folder in the site should be password protected.
+
 ## How to use
-This updater can be added to the grid launcher's settings menu by placing mglupdate.3dsx, config.txt, and index.lua all in /gridlauncher/update
+This updater can be added to the grid launcher's settings menu by placing `mglupdate.3dsx` and `index.lua` in `/gridlauncher/update`.
 
-Otherwise, extract it any place you like (e.g. /3ds/mglupdate)
+Otherwise, extract it any place you like (e.g. `/3ds/mglupdate`)
 
-If your launcher is not at /boot.3dsx, edit config.txt to point it to the correct location.
-
-Run the program and the program will attempt to show you the latest version available. Press A to download and apply the update. The launcher will automatically exit once the new version is in place.
+Run the program and the program will attempt to show you the latest version available. Press A to download and apply the update.
 
 # License
 The index.lua script is under the MIT license. Lua Player Plus is under the GPLv3 license.

@@ -1,6 +1,7 @@
 --ihaveamac--
 -- updater issues go to https://github.com/ihaveamac/mashers-gl-updater/issues
 -- licensed under the MIT license: https://github.com/ihaveamac/mashers-gl-updater/blob/master/LICENSE.md
+version = "2.03"
 
 -- site urls
 getstate_url = "http://ianburgwin.net/mglupdate-2/updatestate.php"
@@ -53,16 +54,21 @@ function printb(x, y, text, clr)
 	end
 	Screen.debugPrint(x, y, text, clr, BOTTOM_SCREEN)
 end
+function displayError(err)
+	co = Console.new(BOTTOM_SCREEN)
+	Console.append(co, "\n\n\n\n\nError details:\n\n"..err)
+	Console.show(co)
+end
 function drawLine(clr)
 	Screen.fillEmptyRect(6, 393, 17, 18, clr, TOP_SCREEN)
 end
 
 -- credits
 function drawCredits()
-	printb(5, 40, "grid launcher by mashers", Color.new(127, 127, 127))
-	printb(10, 55, "gbatemp.net/threads/397527/", Color.new(127, 127, 127))
-	printb(5, 5, "updater by ihaveamac", Color.new(127, 127, 127))
-	printb(10, 20, "ianburgwin.net/mglupdate", Color.new(127, 127, 127))
+	printb(5, 5, "grid launcher by mashers", Color.new(127, 127, 127))
+	printb(10, 20, "gbatemp.net/threads/397527/", Color.new(127, 127, 127))
+	printb(5, 40, "updater by ihaveamac", Color.new(127, 127, 127))
+	printb(10, 55, "ianburgwin.net/mglupdate", Color.new(127, 127, 127))
 end
 
 -- update information on screen
@@ -70,7 +76,7 @@ function updateState(stype, info)
 	Screen.refresh()
 	Screen.clear(TOP_SCREEN)
 	Screen.clear(BOTTOM_SCREEN)
-	print(5, 5, "Grid Launcher Updater v2.02", Color.new(127, 127, 127))
+	print(5, 5, "Grid Launcher Updater v"..version, Color.new(127, 127, 127))
 	print(5, 5, "Grid Launcher Updater")
 		drawCredits()
 	
@@ -92,9 +98,28 @@ function updateState(stype, info)
 		print(5, 60, "If this problem persists, you might need to")
 		print(5, 75, "manually replace this updater.")
 		print(5, 115, "B: exit")
-		co = Console.new(BOTTOM_SCREEN)
-		Console.append(co, "\n\n\n\n\n"..info)
-		Console.show(co)
+		displayError(info)
+		Screen.flip()
+		while true do
+			if Controls.check(Controls.read(), KEY_B) then
+				exit()
+			end
+		end
+	
+	-- updater is disabled usually due to bad version pushed
+	elseif stype == "disabled" then
+		drawLine(Color.new(255, 0, 0))
+		drawCredits()
+		print(5, 25, "The updater has been temporarily disabled.", Color.new(255, 127, 127))
+		print(5, 45, "This might be because a bad version was")
+		print(5, 60, "accidentally pushed out, and would cause")
+		print(5, 75, "problems launching homebrew.")
+		print(5, 95, "Please try again later.")
+		print(5, 115, "More information might be on the GBAtemp")
+		print(5, 130, "thread on the bottom screen.")
+		print(5, 170, "B: exit")
+		printb(10, 20, "gbatemp.net/threads/397527/", Color.new(255, 127, 127))
+		displayError(info)
 		Screen.flip()
 		while true do
 			if Controls.check(Controls.read(), KEY_B) then
@@ -173,8 +198,9 @@ function updateState(stype, info)
 	end
 end
 
--- show preparing
 Screen.waitVblankStart()
+
+-- show preparing
 updateState("prepare")
 System.createDirectory("/mgl_temp")
 
@@ -183,7 +209,13 @@ status, err = pcall(function()
 	Network.requestString(getstate_url)
 end)
 if not status then
-	updateState("noconnection", err)
+	if err:sub(-3) == "404" then
+		updateState("disabled", err)
+		-- trying to forcibly enable the updater is not a good idea
+		-- because you will most likely download a broken grid launcher
+	else
+		updateState("noconnection", err)
+	end
 end
 
 -- get state of the server (if still downloading to cache the latest file)
