@@ -8,11 +8,13 @@ getstate_url = "http://ianburgwin.net/mglupdate-2/updatestate.php"
 versionh_url = "http://ianburgwin.net/mglupdate-2/version.h"
 launcherzip_url = "http://ianburgwin.net/mglupdate-2/launcher.zip"
 
--- launcher and updater information
+-- default updater config contents
+skip_info = false
+
+-- check for local version and updater config
 -- vp[1] = launcher location
 -- vp[2] = launcher version
-vp = {"/boot.3dsx", "%NOVERSION%"}
-skip_info = false
+vp = {"/boot.3dsx", "%NOVERSION%" }
 if System.doesFileExist("/gridlauncher/glinfo.txt") then
 	local gli_file = io.open("/gridlauncher/glinfo.txt", FREAD) -- format: "sdmc:/boot1.3dsx|76"
 	local gli = {}
