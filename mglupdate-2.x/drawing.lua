@@ -25,6 +25,10 @@ function drawMainInfo()
     Screen.refresh()
     Screen.clear(TOP_SCREEN)
     Screen.clear(BOTTOM_SCREEN)
+    if vp[2] ~= "%NOVERSION%" then
+        print(5, 5, "Grid Launcher Update - Installed: "..vp[2], Color.new(127, 127, 255))
+        print(5, 5, "Grid Launcher Update - Installed: ", Color.new(127, 127, 127))
+    end
     print(5, 5, "Grid Launcher Update")
     printb(5, 5, "updater "..version, Color.new(127, 127, 127))
     printb(5, 25, "grid launcher by mashers", Color.new(127, 127, 127))
@@ -42,10 +46,6 @@ function updateState(stype, info)
     if stype == "prepare" or stype == "cacheupdating" then
         drawLine(Color.new(0, 0, 255))
         print(5, 25, "Please wait a moment.")
-        if vp[2] ~= "%NOVERSION%" then
-            print(5, 40, "You have "..vp[2]..".", Color.new(127, 127, 255))
-            print(5, 40, "You have")
-        end
         Screen.flip()
 
         -- failed to get info, usually bad internet connection
@@ -107,7 +107,10 @@ function updateState(stype, info)
             elseif Controls.check(Controls.read(), KEY_L) and Controls.check(Controls.read(), KEY_X) then
                 exit(true)
                 Screen.refresh()
-                print(5, 200, "L+X: rebooting, see you soon!", Color.new(127, 255, 127))
+                -- strange workaround for what I think is double buffering
+                Screen.fillRect(0, 399, 0, 239, Color.new(0, 0, 0), TOP_SCREEN)
+                Screen.fillRect(0, 319, 0, 239, Color.new(0, 0, 0), BOTTOM_SCREEN)
+                print(5, 200, "L+X: rebooting, see you soon!", Color.new(0, 127, 0))
                 Screen.flip()
                 System.reboot()
             end
@@ -119,14 +122,12 @@ function updateState(stype, info)
         -- crappy workaround to highlight specific words
         print(5, 25, "The latest version is "..info..".", Color.new(127, 127, 255))
         print(5, 25, "The latest version is")
-        print(5, 40, "You have "..vp[2]..".", Color.new(127, 127, 255))
-        print(5, 40, "You have")
-        print(5, 60, "The grid launcher's location is:")
-        print(5, 75, vp[1], Color.new(127, 127, 255))
-        print(5, 95, "The updater will also be updated at:")
-        print(5, 110, "/gridlauncher/update")
-        print(5, 150, "A: download and install")
-        print(5, 165, "B: exit")
+        print(5, 45, "The grid launcher's location is:")
+        print(5, 60, vp[1], Color.new(127, 127, 255))
+        print(5, 80, "The updater will also be updated at:")
+        print(5, 95, "/gridlauncher/update")
+        print(5, 135, "A: download and install")
+        print(5, 150, "B: exit")
         Screen.flip()
         while true do
             local pad = Controls.read()
