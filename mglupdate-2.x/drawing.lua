@@ -13,7 +13,7 @@ function printb(x, y, text, clr)
 end
 function displayError(err)
     local co = Console.new(BOTTOM_SCREEN)
-    Console.append(co, "\n\n\n\n\nError details:\n\n"..err)
+    Console.append(co, "\n\n\n\n\n\n\nError details:\n\n"..err)
     Console.show(co)
 end
 function drawLine(clr)
@@ -25,12 +25,12 @@ function drawMainInfo()
     Screen.refresh()
     Screen.clear(TOP_SCREEN)
     Screen.clear(BOTTOM_SCREEN)
-    print(5, 5, "Grid Launcher Update v"..version, Color.new(63, 63, 63))
     print(5, 5, "Grid Launcher Update")
-    printb(5, 5, "grid launcher by mashers", Color.new(127, 127, 127))
-    printb(10, 20, "gbatemp.net/threads/397527/", Color.new(127, 127, 127))
-    printb(5, 40, "updater by ihaveamac", Color.new(127, 127, 127))
-    printb(10, 55, "ianburgwin.net/mglupdate", Color.new(127, 127, 127))
+    printb(5, 5, "updater "..version, Color.new(127, 127, 127))
+    printb(5, 25, "grid launcher by mashers", Color.new(127, 127, 127))
+    printb(10, 40, "gbatemp.net/threads/397527/", Color.new(127, 127, 127))
+    printb(5, 60, "updater by ihaveamac", Color.new(127, 127, 127))
+    printb(10, 75, "ianburgwin.net/mglupdate", Color.new(127, 127, 127))
 end
 
 -- update information on screen
@@ -75,7 +75,7 @@ function updateState(stype, info)
         print(5, 115, "More information might be on the GBAtemp")
         print(5, 130, "thread on the bottom screen.")
         print(5, 170, "Y: exit")
-        printb(10, 20, "gbatemp.net/threads/397527/", Color.new(255, 127, 127))
+        printb(10, 40, "gbatemp.net/threads/397527/", Color.new(255, 127, 127))
         displayError(info)
         Screen.flip()
         while true do
@@ -97,7 +97,7 @@ function updateState(stype, info)
         print(5, 145, "screen.")
         print(5, 185, "Y: exit")
         print(5, 200, "L+X: reboot")
-        printb(10, 55, "ianburgwin.net/mglupdate", Color.new(255, 127, 127))
+        printb(10, 75, "ianburgwin.net/mglupdate", Color.new(255, 127, 127))
         displayError(info)
         Screen.flip()
         while true do
@@ -210,9 +210,10 @@ function updateState(stype, info)
         print(5, 40, "If you are reading this on your 3DS,")
         print(5, 55, "tell ihaveamac on GitHub.")
         print(5, 75, "Note this: "..lastState)
+        print(5, 115, "Y: exit")
         Screen.flip()
         while true do
-            if Controls.check(Controls.read(), KEY_B) then
+            if Controls.check(Controls.read(), KEY_Y) then
                 exit()
             end
         end

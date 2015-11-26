@@ -1,20 +1,18 @@
 --ihaveamac--
 -- updater issues go to https://github.com/ihaveamac/mashers-gl-updater/issues
 -- licensed under the MIT license: https://github.com/ihaveamac/mashers-gl-updater/blob/master/LICENSE.md
-version = "2.05"
-
--- debug info - only used during development
-allow_force_error = true
+version = "2.1"
 
 -- site urls
 getstate_url = "http://ianburgwin.net/mglupdate-2/updatestate.php"
 versionh_url = "http://ianburgwin.net/mglupdate-2/version.h"
 launcherzip_url = "http://ianburgwin.net/mglupdate-2/launcher.zip"
 
--- launcher information
+-- launcher and updater information
 -- vp[1] = launcher location
 -- vp[2] = launcher version
 vp = {"/boot.3dsx", "%NOVERSION%"}
+skip_info = false
 if System.doesFileExist("/gridlauncher/glinfo.txt") then
 	local gli_file = io.open("/gridlauncher/glinfo.txt", FREAD) -- format: "sdmc:/boot1.3dsx|76"
 	local gli = {}
@@ -23,6 +21,15 @@ if System.doesFileExist("/gridlauncher/glinfo.txt") then
 	end
 	vp[1] = gli[1]:sub(6)
 	vp[2] = gli[2]:sub(1, gli[2]:len() - 1)
+
+	if System.doesFileExist("/gridlauncher/updater.cfg") then
+		dofile("/gridlauncher/updater.cfg")
+	else
+		local cfgfile = io.open("/gridlauncher/updater.cfg", FCREATE)
+		local cfgfile_d = "skip_info = false"
+		io.write(cfgfile, 0, cfgfile_d, cfgfile_d:len())
+		io.close(cfgfile)
+	end
 end
 
 -- exit - hold L to keep the temporary files
@@ -60,6 +67,8 @@ status, err = pcall(function()
 	-- show preparing
 	updateState("prepare")
 	System.createDirectory("/mgl_temp")
+
+	-- if allow_force_error is set outside of this script then an error can be forced
 	if allow_force_error and Controls.check(Controls.read(), KEY_L) then
 		error("forced error")
 	end
@@ -95,25 +104,28 @@ status, err = pcall(function()
 		Timer.destroy(ti)
 		getServerState()
 	end
-
+	
+	local latest_ver = state:sub(24)
 	-- display version information
 	if vp[2] == "%NOVERSION%" then
-		updateState("showversion-noinstall", state:sub(24))
+		updateState("showversion-noinstall", latest_ver)
 	else
-		updateState("showversion", state:sub(24))
+		if not skip_info or vp[2] == latest_ver then
+			updateState("showversion", latest_ver)
+		end
 	end
 
 	-- download launcher.zip
-	updateState("downloading", state:sub(24))
+	updateState("downloading", latest_ver)
 	System.deleteFile("/mgl_temp/launcher.zip")
 	Network.downloadFile(launcherzip_url, "/mgl_temp/launcher.zip")
 
 	-- extract launcher.zip
-	updateState("extracting", state:sub(24))
+	updateState("extracting", latest_ver)
 	System.extractZIP("/mgl_temp/launcher.zip", "/mgl_temp")
 
 	-- install the files
-	updateState("installing", state:sub(24))
+	updateState("installing", latest_ver)
 	System.createDirectory("/gridlauncher/update")
 	deleteDirContents("/gridlauncher/update")
 	local new_update = System.listDirectory("/mgl_temp/gridlauncher/update")
@@ -128,7 +140,11 @@ status, err = pcall(function()
 	System.renameFile("/mgl_temp/boot.3dsx", vp[1])
 
 	-- done!
-	updateState("done", state:sub(24))
+	if skip_info then
+		exit()
+	else
+		updateState("done", latest_ver)
+	end
 end)
 if not status then
 	if err:sub(-6) == "%EXIT%" then
