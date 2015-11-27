@@ -1,4 +1,5 @@
 <?php
+if (file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate-2/enabled") !== "yes") header("HTTP/1.0 404 Not Found"); // breaks the updater program
 $result = ".";
 $versionh_local = file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate-2/version.h");
 if ($versionh_local == "notready") {
@@ -19,5 +20,4 @@ if ($versionh_local == "notready") {
 		$result = "READY";
 	}
 }
-if (file_get_contents($_SERVER["DOCUMENT_ROOT"]."/mglupdate-2/enabled") !== "yes") header("HTTP/1.0 404 Not Found"); // breaks the updater program
 echo $result;
