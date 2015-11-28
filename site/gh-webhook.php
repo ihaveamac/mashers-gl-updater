@@ -30,6 +30,7 @@ foreach ($push["commits"] as $commit) {
             $versionh = trim(file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/source/version.h"));
             file_put_contents("version.h", $versionh);
             $launcherzip = file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/launcher.zip");
+            file_put_contents("launcher.zip", $launcherzip);
             $result .= " > saved version.h and launcher.zip\n";
             $downloaded = true;
         }
