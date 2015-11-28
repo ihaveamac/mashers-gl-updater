@@ -1,12 +1,15 @@
 --ihaveamac--
 -- updater issues go to https://github.com/ihaveamac/mashers-gl-updater/issues
 -- licensed under the MIT license: https://github.com/ihaveamac/mashers-gl-updater/blob/master/LICENSE.md
-version = "2.1"
+version = "2.2"
 
 -- site urls
-getstate_url = "http://ianburgwin.net/mglupdate-2/updatestate.php"
+-- as updating is now handled with GitHub Webhooks, updatestate.php is no longer necessary.
+--getstate_url = "http://ianburgwin.net/mglupdate-2/updatestate.php"
 versionh_url = "http://ianburgwin.net/mglupdate-2/version.h"
 launcherzip_url = "http://ianburgwin.net/mglupdate-2/launcher.zip"
+changelog_url = "http://ianburgwin.net/mglupdate-2/Update-Changelog.md"
+changelog_beta_url = "http://ianburgwin.net/mglupdate-2/Update-Changelog-Beta.md"
 
 -- default updater config contents
 skip_info = false

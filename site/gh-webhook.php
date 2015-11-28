@@ -1,9 +1,10 @@
 <?php
 header("Content-Type: none");
 
-// get secret
+// get secret and set config
 $secret = "";
-require("gh-webhook-config.php");
+$force_download = false;
+include_once("gh-webhook-config.php");
 $json = file_get_contents('php://input');
 $headers = getallheaders();
 
@@ -14,16 +15,49 @@ if (!isset($headers['X-Hub-Signature'])) {
     echo "You're not GitHub!"; die;
 }
 
+$result = "verified! :D\n";
+
 // turn into array
 $push = json_decode($json, true);
 
+// check for version or changelog change, and update if necessary
+foreach ($push["commits"] as $commit) {
+    foreach ($commit["modified"] as $filename) {
+        if ($filename == "source/version.h" or $force_download) {
+            unlink("launcher.zip");
+            file_put_contents("version.h", "notready"); // "notready" = 3DS will wait for server to cache
+            $versionh = trim(file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/source/version.h"));
+            file_put_contents("version.h", $versionh);
+            $launcherzip = file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/launcher.zip");
+            $result .= " > saved version.h and launcher.zip\n";
+        }
+        if ($filename == "Updating/Updating-Changelog.md" or $force_download) {
+            unlink("Updating-Changelog.md");
+            $changelog_release = file_get_contents("https://raw.githubusercontent.com/RedInquisitive/3DS-Homebrew-Menu-Wiki/master/Updating/Updating-Changelog.md");
+            file_put_contents("Updating-Changelog.md", $changelog_release);
+            $result .= " > saved Updating-Changelog.md\n";
+        }
+        if ($filename == "Updating/Updating-Changelog-Beta.md" or $force_download) {
+            unlink("Updating-Changelog-Beta.md");
+            $changelog_beta = file_get_contents("https://raw.githubusercontent.com/RedInquisitive/3DS-Homebrew-Menu-Wiki/master/Updating/Updating-Changelog-Beta.md");
+            file_put_contents("Updating-Changelog-Beta.md", $changelog_beta);
+            $result .= " > saved Updating-Changelog-Beta.md\n";
+        }
+    }
+}
+
 // return result for GitHub
-$result = "checks:\n";
-$result .= " - can I see X-GitHub-Event?  ".(isset($headers['X-Github-Event']) ? "yes: \"".$headers['X-Github-Event']."\"" : "no...")."\n";
-$result .= " - can I see X-Hub-Signature? ".(isset($headers['X-Hub-Signature']) ? "yes: \"".$headers['X-Hub-Signature']."\"" : "no...")."\n";
-$result .= " - does it pass the test?     ".("sha1=".hash_hmac("sha1", $json, $secret) == $headers['X-Hub-Signature'] ? "yes!" : "no...")."\n";
-$result .= "\n-----\n".print_r($headers, true)."-----\n".print_r(json_decode($json, true), true);
+$result .= " - list changed files:\n";
+foreach ($push["commits"] as $commit) {
+    foreach ($commit["modified"] as $filename) {
+        $result .= "   - ".$filename."\n";
+    }
+}
+$result .= "-----\n".print_r($headers, true)."-----\n".print_r($push, true);
 echo $result;
 
 // temporary local logging
-file_put_contents(__DIR__."/gh-webhook-logtest/webhooktest_".time().".txt", $result);
+file_put_contents("gh-webhook-logtest/webhooktest_".time().".txt", $result);
+
+// check if updater is enabled - return 404 to 3DS, which will stop it from working
+if (file_get_contents("enabled") !== "yes") header("HTTP/1.0 404 Not Found");
