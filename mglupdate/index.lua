@@ -1,11 +1,10 @@
 --ihaveamac--
 -- updater issues go to https://github.com/ihaveamac/mashers-gl-updater/issues
 -- licensed under the MIT license: https://github.com/ihaveamac/mashers-gl-updater/blob/master/LICENSE.md
-version = "2.2"
+version = "2.2b"
 
 -- site urls
--- as updating is now handled with GitHub Webhooks, updatestate.php is no longer necessary.
---getstate_url = "http://ianburgwin.net/mglupdate-2/updatestate.php"
+enabled_url = "http://ianburgwin.net/mglupdate-2/enabled"
 versionh_url = "http://ianburgwin.net/mglupdate-2/version.h"
 launcherzip_url = "http://ianburgwin.net/mglupdate-2/launcher.zip"
 changelog_url = "http://ianburgwin.net/mglupdate-2/Update-Changelog.md"
@@ -79,11 +78,12 @@ status, err = pcall(function()
 	end
 
 	-- check network connection and trigger actions on the server
+	local enabled = "no"
 	local n_status, n_err = pcall(function()
-		Network.requestString(getstate_url)
+		Network.requestString(enabled_url)
 	end)
 	if not n_status then
-		if n_err:sub(-3) == "404" then
+		if enabled ~= "yes" then
 			updateState("disabled", n_err)
 			-- trying to forcibly enable the updater is not a good idea
 			-- because you will most likely download a broken grid launcher

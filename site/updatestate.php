@@ -1,5 +1,9 @@
 <?php
+// this file is no longer used and is kept here for legacy reasons or whatever.
+// please look at gh-webhook.php for the new one.
 if (file_get_contents(__DIR__."/enabled") !== "yes") header("HTTP/1.0 404 Not Found"); // breaks the updater program
+die;
+// --------------------------------------------- //
 $result = ".";
 $versionh_local = file_get_contents(__DIR__."/version.h");
 if ($versionh_local == "notready") {

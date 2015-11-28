@@ -21,6 +21,7 @@ $result = "verified! :D\n";
 $push = json_decode($json, true);
 
 // check for version or changelog change, and update if necessary
+$downloaded = false;
 foreach ($push["commits"] as $commit) {
     foreach ($commit["modified"] as $filename) {
         if ($filename == "source/version.h" or $force_download) {
@@ -30,18 +31,24 @@ foreach ($push["commits"] as $commit) {
             file_put_contents("version.h", $versionh);
             $launcherzip = file_get_contents("https://raw.githubusercontent.com/mashers/3ds_hb_menu/master/launcher.zip");
             $result .= " > saved version.h and launcher.zip\n";
+            $downloaded = true;
         }
         if ($filename == "Updating/Updating-Changelog.md" or $force_download) {
             unlink("Updating-Changelog.md");
             $changelog_release = file_get_contents("https://raw.githubusercontent.com/RedInquisitive/3DS-Homebrew-Menu-Wiki/master/Updating/Updating-Changelog.md");
             file_put_contents("Updating-Changelog.md", $changelog_release);
             $result .= " > saved Updating-Changelog.md\n";
+            $downloaded = true;
         }
         if ($filename == "Updating/Updating-Changelog-Beta.md" or $force_download) {
             unlink("Updating-Changelog-Beta.md");
             $changelog_beta = file_get_contents("https://raw.githubusercontent.com/RedInquisitive/3DS-Homebrew-Menu-Wiki/master/Updating/Updating-Changelog-Beta.md");
             file_put_contents("Updating-Changelog-Beta.md", $changelog_beta);
             $result .= " > saved Updating-Changelog-Beta.md\n";
+            $downloaded = true;
+        }
+        if ($downloaded) {
+            break;
         }
     }
 }
@@ -58,6 +65,3 @@ echo $result;
 
 // temporary local logging
 file_put_contents("gh-webhook-logtest/webhooktest_".time().".txt", $result);
-
-// check if updater is enabled - return 404 to 3DS, which will stop it from working
-if (file_get_contents("enabled") !== "yes") header("HTTP/1.0 404 Not Found");
