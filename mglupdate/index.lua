@@ -42,6 +42,7 @@ function exit(noErr)
 		deleteDirContents("/mgl_temp")
 		System.deleteDirectory("/mgl_temp")
 	end
+	Graphics.term()
 	if not noErr then
 		-- prevents a second error from showing when there's already an error
 		error("%EXIT%")
@@ -109,7 +110,7 @@ status, err = pcall(function()
 		Timer.destroy(ti)
 		getServerState()
 	end
-	
+
 	local latest_ver = state:sub(24)
 	-- display version information
 	if vp[2] == "%NOVERSION%" then

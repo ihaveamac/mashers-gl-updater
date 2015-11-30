@@ -1,4 +1,5 @@
 -- print to screen
+Graphics.init()
 function print(x, y, text, clr)
     if not clr then
         clr = Color.new(255, 255, 255)
@@ -17,7 +18,9 @@ function displayError(err)
     Console.show(co)
 end
 function drawLine(clr)
-    Screen.fillEmptyRect(6, 393, 17, 18, clr, TOP_SCREEN)
+    Graphics.initBlend(TOP_SCREEN)
+    Graphics.fillEmptyRect(6, 394, 20, 21, clr)
+    Graphics.termBlend()
 end
 
 -- credits
@@ -26,10 +29,10 @@ function drawMainInfo()
     Screen.clear(TOP_SCREEN)
     Screen.clear(BOTTOM_SCREEN)
     if vp[2] ~= "%NOVERSION%" then
-        print(5, 5, "Grid Launcher Update - Installed: "..vp[2], Color.new(127, 127, 255))
-        print(5, 5, "Grid Launcher Update - Installed: ", Color.new(127, 127, 127))
+        print(5, 5, "Grid Launcher Update - Installed: "..vp[2], Color.new(127, 127, 255), true)
+        print(5, 5, "Grid Launcher Update - Installed: ", Color.new(127, 127, 127), true)
     end
-    print(5, 5, "Grid Launcher Update")
+    print(5, 5, "Grid Launcher Update", false--[[weird workaround]], true)
     printb(5, 5, "updater "..version, Color.new(127, 127, 127))
     printb(5, 25, "grid launcher by mashers", Color.new(127, 127, 127))
     printb(10, 40, "gbatemp.net/threads/397527/", Color.new(127, 127, 127))
