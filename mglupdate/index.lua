@@ -42,7 +42,6 @@ function exit(noErr)
 		deleteDirContents("/mgl_temp")
 		System.deleteDirectory("/mgl_temp")
 	end
-	Graphics.term()
 	if not noErr then
 		-- prevents a second error from showing when there's already an error
 		error("%EXIT%")

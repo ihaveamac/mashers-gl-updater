@@ -1,5 +1,4 @@
 -- print to screen
-Graphics.init()
 function print(x, y, text, clr)
     if not clr then
         clr = Color.new(255, 255, 255)
@@ -18,9 +17,7 @@ function displayError(err)
     Console.show(co)
 end
 function drawLine(clr)
-    Graphics.initBlend(TOP_SCREEN)
-    Graphics.fillEmptyRect(6, 394, 20, 21, clr)
-    Graphics.termBlend()
+    Screen.fillEmptyRect(6, 394, 20, 21, clr, TOP_SCREEN)
 end
 
 -- credits
