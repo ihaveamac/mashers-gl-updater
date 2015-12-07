@@ -22,12 +22,9 @@ function displayError(err)
     Console.append(co, "\n\n\n\n\n\n\nError details:\n\n"..err)
     Console.show(co)
 end
-function drawLine(clr)
-    Screen.fillEmptyRect(6, 394, 17, 18, clr, TOP_SCREEN)
-end
 
 -- credits
-function drawMainInfo()
+function drawMainInfo(clr)
     Screen.refresh()
     Screen.clear(TOP_SCREEN)
     Screen.clear(BOTTOM_SCREEN)
@@ -41,22 +38,21 @@ function drawMainInfo()
     printb(10, 40, "gbatemp.net/threads/397527/", c_grey)
     printb(5, 60, "updater by ihaveamac", c_grey)
     printb(10, 75, "ianburgwin.net/mglupdate", c_grey)
+    Screen.fillEmptyRect(6, 394, 17, 18, clr, TOP_SCREEN)
 end
 
 -- update information on screen
 lastState = ""
 function updateState(stype, info)
-    drawMainInfo()
-
     -- getting latest information
     if stype == "prepare" or stype == "cacheupdating" then
-        drawLine(Color.new(0, 0, 255))
+        drawMainInfo(Color.new(0, 0, 255))
         print(5, 25, "Please wait a moment.")
         Screen.flip()
 
-        -- failed to get info, usually bad internet connection
+    -- failed to get info, usually bad internet connection
     elseif stype == "noconnection" then
-        drawLine(Color.new(255, 0, 0))
+        drawMainInfo(Color.new(255, 0, 0))
         print(5, 25, "Couldn't get the latest version!", c_light_red)
         print(5, 40, "Check your connection to the Internet.")
         print(5, 60, "If this problem persists, you might need to")
@@ -70,9 +66,9 @@ function updateState(stype, info)
             end
         end
 
-        -- updater is disabled usually due to bad version pushed
+    -- updater is disabled usually due to bad version pushed
     elseif stype == "disabled" then
-        drawLine(Color.new(255, 0, 0))
+        drawMainInfo(Color.new(255, 0, 0))
         print(5, 25, "The updater has been temporarily disabled.", c_light_red)
         print(5, 45, "This might be because a bad version was")
         print(5, 60, "accidentally pushed out, and would cause")
@@ -90,9 +86,9 @@ function updateState(stype, info)
             end
         end
 
-        -- updater is disabled usually due to bad version pushed
+    -- updater is disabled usually due to bad version pushed
     elseif stype == "error" then
-        drawLine(Color.new(255, 0, 0))
+        drawMainInfo(Color.new(255, 0, 0))
         print(5, 25, "An error has occured.", c_light_red)
         print(5, 40, "Please check the bottom screen.")
         print(5, 60, "If the problem is related to ZIP extraction,")
@@ -122,9 +118,9 @@ function updateState(stype, info)
             end
         end
 
-        -- show version and other information
+    -- show version and other information
     elseif stype == "showversion" then
-        drawLine(Color.new(85, 85, 255))
+        drawMainInfo(Color.new(85, 85, 255))
         -- crappy workaround to highlight specific words
         print(5, 25, "The latest version is "..info..".", c_light_blue)
         print(5, 25, "The latest version is")
@@ -137,18 +133,34 @@ function updateState(stype, info)
         print(5, 80, "The updater will also be updated at:")
         print(5, 95, "/gridlauncher/update")
         print(5, 135, "A: download and install")
-        print(5, 150, "X: display changes for "..info)
+        print(5, 150, "X: display changes for "..info.." (NYI)")
         print(5, 165, "B: exit")
         Screen.flip()
         while true do
             local pad = Controls.read()
             if Controls.check(pad, KEY_B) then exit()
+            elseif Controls.check(pad, KEY_X) then
+                local result = updateState("showchangelog", info)
+                if result then return
+                else exit() end
             elseif Controls.check(pad, KEY_A) then return end
         end
 
-        -- show version and other information if glinfo.txt is missing
+    -- show changelog
+    elseif stype == "showchangelog" then
+        drawMainInfo(Color.new(255, 0, 0))
+        print(5, 25, "not yet implemented")
+        print(5, 65, "Y: exit")
+        Screen.flip()
+        while true do
+            if Controls.check(Controls.read(), KEY_Y) then
+                exit()
+            end
+        end
+    
+    -- show version and other information if glinfo.txt is missing
     elseif stype == "showversion-noinstall" then
-        drawLine(Color.new(85, 85, 255))
+        drawMainInfo(Color.new(85, 85, 255))
         -- crappy workaround to highlight specific words
         print(5, 25, "The latest version is "..info..".", c_light_blue)
         print(5, 25, "The latest version is")
@@ -173,9 +185,9 @@ function updateState(stype, info)
             elseif Controls.check(pad, KEY_A) then return end
         end
 
-        -- downloading launcher.zip
+    -- downloading launcher.zip
     elseif stype == "downloading" then
-        drawLine(Color.new(127, 255, 127))
+        drawMainInfo(Color.new(127, 255, 127))
         print(5, 25, "-> Downloading "..info..", be patient!")
         print(5, 40, "    Extracting, sit tight!", c_grey)
         print(5, 55, "    Installing, this doesn't take long!", c_grey)
@@ -183,9 +195,9 @@ function updateState(stype, info)
         print(5, 110, "Do not turn off the power.")
         Screen.flip()
 
-        -- now comes the extraction
+    -- now comes the extraction
     elseif stype == "extracting" then
-        drawLine(Color.new(127, 255, 127))
+        drawMainInfo(Color.new(127, 255, 127))
         print(5, 25, "    Downloading "..info..", be patient!", c_grey)
         print(5, 40, "-> Extracting, sit tight!")
         print(5, 55, "    Installing, this doesn't take long!", c_grey)
@@ -193,9 +205,9 @@ function updateState(stype, info)
         print(5, 110, "Do not turn off the power.")
         Screen.flip()
 
-        -- now comes the extraction
+    -- now comes the extraction
     elseif stype == "installing" then
-        drawLine(Color.new(127, 255, 127))
+        drawMainInfo(Color.new(127, 255, 127))
         print(5, 25, "    Downloading "..info..", be patient!", c_grey)
         print(5, 40, "    Extracting, sit tight!", c_grey)
         print(5, 55, "-> Installing, this doesn't take long!")
@@ -203,9 +215,9 @@ function updateState(stype, info)
         print(5, 110, "Do not turn off the power.")
         Screen.flip()
 
-        -- and we're all done
+    -- and we're all done
     elseif stype == "done" then
-        drawLine(Color.new(0, 255, 0))
+        drawMainInfo(Color.new(0, 255, 0))
         print(5, 25, "    Downloading "..info..", be patient!", c_grey)
         print(5, 40, "    Extracting, sit tight!", c_grey)
         print(5, 55, "    Installing, this doesn't take long!", c_grey)
@@ -219,9 +231,9 @@ function updateState(stype, info)
             end
         end
 
-        -- prevent the program from automatically continuing if I make a mistake
+    -- prevent the program from automatically continuing if I make a mistake
     else
-        drawLine(Color.new(255, 0, 0))
+        drawMainInfo(Color.new(255, 0, 0))
         print(5, 25, "uh...")
         print(5, 40, "If you are reading this on your 3DS,")
         print(5, 55, "tell ihaveamac on GitHub.")
@@ -234,6 +246,6 @@ function updateState(stype, info)
             end
         end
 
-        -- the end!!!
+    -- the end!!!
     end
 end
