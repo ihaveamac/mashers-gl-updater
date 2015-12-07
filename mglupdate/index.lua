@@ -39,6 +39,7 @@ end
 local cfgfile
 if System.doesFileExist("/gridlauncher/updater.cfg") then
 	dofile("/gridlauncher/updater.cfg")
+	--noinspection UnusedDef
 	cfgfile = io.open("/gridlauncher/updater.cfg", FWRITE)
 else
 	cfgfile = io.open("/gridlauncher/updater.cfg", FCREATE)
@@ -92,6 +93,7 @@ status, err = pcall(function()
 	end
 
 	-- check network connection
+	--noinspection UnusedDef
 	local enabled = "no"
 	local n_status, n_err = pcall(function()
 		enabled = Network.requestString(enabled_url)
