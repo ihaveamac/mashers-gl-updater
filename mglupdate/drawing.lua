@@ -1,13 +1,19 @@
+-- colors
+c_white = Color.new(255, 255, 255)
+c_grey = Color.new(127, 127, 127)
+c_light_red = Color.new(255, 127, 127)
+c_light_blue = Color.new(127, 127, 255)
+
 -- print to screen
 function print(x, y, text, clr)
     if not clr then
-        clr = Color.new(255, 255, 255)
+        clr = c_white
     end
     Screen.debugPrint(x, y, text, clr, TOP_SCREEN)
 end
 function printb(x, y, text, clr)
     if not clr then
-        clr = Color.new(255, 255, 255)
+        clr = c_white
     end
     Screen.debugPrint(x, y, text, clr, BOTTOM_SCREEN)
 end
@@ -26,15 +32,15 @@ function drawMainInfo()
     Screen.clear(TOP_SCREEN)
     Screen.clear(BOTTOM_SCREEN)
     if vp[2] ~= "%NOVERSION%" then
-        print(5, 5, "Grid Launcher Update - Installed: "..vp[2], Color.new(127, 127, 255), true)
-        print(5, 5, "Grid Launcher Update - Installed: ", Color.new(127, 127, 127), true)
+        print(5, 5, "Grid Launcher Update - Installed: "..vp[2], c_light_blue, true)
+        print(5, 5, "Grid Launcher Update - Installed: ", c_grey, true)
     end
     print(5, 5, "Grid Launcher Update", false--[[weird workaround]], true)
-    printb(5, 5, "updater "..version, Color.new(127, 127, 127))
-    printb(5, 25, "grid launcher by mashers", Color.new(127, 127, 127))
-    printb(10, 40, "gbatemp.net/threads/397527/", Color.new(127, 127, 127))
-    printb(5, 60, "updater by ihaveamac", Color.new(127, 127, 127))
-    printb(10, 75, "ianburgwin.net/mglupdate", Color.new(127, 127, 127))
+    printb(5, 5, "updater "..version, c_grey)
+    printb(5, 25, "grid launcher by mashers", c_grey)
+    printb(10, 40, "gbatemp.net/threads/397527/", c_grey)
+    printb(5, 60, "updater by ihaveamac", c_grey)
+    printb(10, 75, "ianburgwin.net/mglupdate", c_grey)
 end
 
 -- update information on screen
@@ -51,7 +57,7 @@ function updateState(stype, info)
         -- failed to get info, usually bad internet connection
     elseif stype == "noconnection" then
         drawLine(Color.new(255, 0, 0))
-        print(5, 25, "Couldn't get the latest version!", Color.new(255, 127, 127))
+        print(5, 25, "Couldn't get the latest version!", c_light_red)
         print(5, 40, "Check your connection to the Internet.")
         print(5, 60, "If this problem persists, you might need to")
         print(5, 75, "manually replace this updater.")
@@ -67,7 +73,7 @@ function updateState(stype, info)
         -- updater is disabled usually due to bad version pushed
     elseif stype == "disabled" then
         drawLine(Color.new(255, 0, 0))
-        print(5, 25, "The updater has been temporarily disabled.", Color.new(255, 127, 127))
+        print(5, 25, "The updater has been temporarily disabled.", c_light_red)
         print(5, 45, "This might be because a bad version was")
         print(5, 60, "accidentally pushed out, and would cause")
         print(5, 75, "problems launching homebrew.")
@@ -75,7 +81,7 @@ function updateState(stype, info)
         print(5, 115, "More information might be on the GBAtemp")
         print(5, 130, "thread on the bottom screen.")
         print(5, 170, "Y: exit")
-        printb(10, 40, "gbatemp.net/threads/397527/", Color.new(255, 127, 127))
+        printb(10, 40, "gbatemp.net/threads/397527/", c_light_red)
         displayError(info)
         Screen.flip()
         while true do
@@ -87,7 +93,7 @@ function updateState(stype, info)
         -- updater is disabled usually due to bad version pushed
     elseif stype == "error" then
         drawLine(Color.new(255, 0, 0))
-        print(5, 25, "An error has occured.", Color.new(255, 127, 127))
+        print(5, 25, "An error has occured.", c_light_red)
         print(5, 40, "Please check the bottom screen.")
         print(5, 60, "If the problem is related to ZIP extraction,")
         print(5, 75, "try running the updater again.")
@@ -97,7 +103,7 @@ function updateState(stype, info)
         print(5, 145, "screen.")
         print(5, 185, "Y: exit")
         print(5, 200, "L+X: reboot")
-        printb(10, 75, "ianburgwin.net/mglupdate", Color.new(255, 127, 127))
+        printb(10, 75, "ianburgwin.net/mglupdate", c_light_red)
         displayError(info)
         Screen.flip()
         while true do
@@ -120,14 +126,14 @@ function updateState(stype, info)
     elseif stype == "showversion" then
         drawLine(Color.new(85, 85, 255))
         -- crappy workaround to highlight specific words
-        print(5, 25, "The latest version is "..info..".", Color.new(127, 127, 255))
+        print(5, 25, "The latest version is "..info..".", c_light_blue)
         print(5, 25, "The latest version is")
         if force_path == "" then
             print(5, 45, "The launcher's detected location is:")
         else
             print(5, 45, "The launcher's manually set location is:")
         end
-        print(5, 60, vp[1], Color.new(127, 127, 255))
+        print(5, 60, vp[1], c_light_blue)
         print(5, 80, "The updater will also be updated at:")
         print(5, 95, "/gridlauncher/update")
         print(5, 135, "A: download and install")
@@ -144,7 +150,7 @@ function updateState(stype, info)
     elseif stype == "showversion-noinstall" then
         drawLine(Color.new(85, 85, 255))
         -- crappy workaround to highlight specific words
-        print(5, 25, "The latest version is "..info..".", Color.new(127, 127, 255))
+        print(5, 25, "The latest version is "..info..".", c_light_blue)
         print(5, 25, "The latest version is")
         print(5, 45, "You are missing /gridlauncher/glinfo.txt.")
         print(5, 65, "This might be because you are not using the")
@@ -155,7 +161,7 @@ function updateState(stype, info)
         else
             print(5, 115, "The launcher's manually set location is:")
         end
-        print(5, 130, vp[1], Color.new(127, 127, 255))
+        print(5, 130, vp[1], c_light_blue)
         print(5, 150, "The updater will also be updated at:")
         print(5, 165, "/gridlauncher/update")
         print(5, 205, "A: download and install")
@@ -171,38 +177,38 @@ function updateState(stype, info)
     elseif stype == "downloading" then
         drawLine(Color.new(127, 255, 127))
         print(5, 25, "-> Downloading "..info..", be patient!")
-        print(5, 40, "    Extracting, sit tight!", Color.new(127, 127, 127))
-        print(5, 55, "    Installing, this doesn't take long!", Color.new(127, 127, 127))
-        print(5, 70, "    Done!", Color.new(127, 127, 127))
+        print(5, 40, "    Extracting, sit tight!", c_grey)
+        print(5, 55, "    Installing, this doesn't take long!", c_grey)
+        print(5, 70, "    Done!", c_grey)
         print(5, 110, "Do not turn off the power.")
         Screen.flip()
 
         -- now comes the extraction
     elseif stype == "extracting" then
         drawLine(Color.new(127, 255, 127))
-        print(5, 25, "    Downloading "..info..", be patient!", Color.new(127, 127, 127))
+        print(5, 25, "    Downloading "..info..", be patient!", c_grey)
         print(5, 40, "-> Extracting, sit tight!")
-        print(5, 55, "    Installing, this doesn't take long!", Color.new(127, 127, 127))
-        print(5, 70, "    Done!", Color.new(127, 127, 127))
+        print(5, 55, "    Installing, this doesn't take long!", c_grey)
+        print(5, 70, "    Done!", c_grey)
         print(5, 110, "Do not turn off the power.")
         Screen.flip()
 
         -- now comes the extraction
     elseif stype == "installing" then
         drawLine(Color.new(127, 255, 127))
-        print(5, 25, "    Downloading "..info..", be patient!", Color.new(127, 127, 127))
-        print(5, 40, "    Extracting, sit tight!", Color.new(127, 127, 127))
+        print(5, 25, "    Downloading "..info..", be patient!", c_grey)
+        print(5, 40, "    Extracting, sit tight!", c_grey)
         print(5, 55, "-> Installing, this doesn't take long!")
-        print(5, 70, "    Done!", Color.new(127, 127, 127))
+        print(5, 70, "    Done!", c_grey)
         print(5, 110, "Do not turn off the power.")
         Screen.flip()
 
         -- and we're all done
     elseif stype == "done" then
         drawLine(Color.new(0, 255, 0))
-        print(5, 25, "    Downloading "..info..", be patient!", Color.new(127, 127, 127))
-        print(5, 40, "    Extracting, sit tight!", Color.new(127, 127, 127))
-        print(5, 55, "    Installing, this doesn't take long!", Color.new(127, 127, 127))
+        print(5, 25, "    Downloading "..info..", be patient!", c_grey)
+        print(5, 40, "    Extracting, sit tight!", c_grey)
+        print(5, 55, "    Installing, this doesn't take long!", c_grey)
         print(5, 70, "-> Done!", Color.new(127, 255, 127))
         print(5, 70, "->")
         print(5, 110, "A/B: exit")
