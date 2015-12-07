@@ -3,6 +3,11 @@
 -- licensed under the MIT license: https://github.com/ihaveamac/mashers-gl-updater/blob/master/LICENSE.md
 version = "2.2b"
 
+-- temporary workaround due to a mistake in the current lpp-3ds build
+FREAD = 0
+FWRITE = 1
+FCREATE = 2
+
 -- site urls
 enabled_url = "http://ianburgwin.net/mglupdate-2/enabled"
 versionh_url = "http://ianburgwin.net/mglupdate-2/version.h"
@@ -12,7 +17,11 @@ changelog_beta_url = "http://ianburgwin.net/mglupdate-2/Update-Changelog-Beta.md
 
 -- default updater config contents
 skip_info = false
+force_path = ""
 
+function formatConfig()
+	return "skip_info = "..tostring(skip_info).."\nforce_path = \""..force_path.."\" -- leave this as \"\" to automatically detect launcher location"
+end
 -- check for local version and updater config
 -- vp[1] = launcher location
 -- vp[2] = launcher version
@@ -25,15 +34,20 @@ if System.doesFileExist("/gridlauncher/glinfo.txt") then
 	end
 	vp[1] = gli[1]:sub(6)
 	vp[2] = gli[2]:sub(1, gli[2]:len() - 1)
+end
 
-	if System.doesFileExist("/gridlauncher/updater.cfg") then
-		dofile("/gridlauncher/updater.cfg")
-	else
-		local cfgfile = io.open("/gridlauncher/updater.cfg", FCREATE)
-		local cfgfile_d = "skip_info = false"
-		io.write(cfgfile, 0, cfgfile_d, cfgfile_d:len())
-		io.close(cfgfile)
-	end
+local cfgfile
+if System.doesFileExist("/gridlauncher/updater.cfg") then
+	dofile("/gridlauncher/updater.cfg")
+	cfgfile = io.open("/gridlauncher/updater.cfg", FWRITE)
+else
+	cfgfile = io.open("/gridlauncher/updater.cfg", FCREATE)
+end
+local cfgfile_d = formatConfig()
+io.write(cfgfile, 0, formatConfig(), cfgfile_d:len())
+io.close(cfgfile)
+if force_path ~= "" then
+	vp[1] = force_path
 end
 
 -- exit - hold L to keep the temporary files
@@ -77,13 +91,16 @@ status, err = pcall(function()
 		error("forced error")
 	end
 
-	-- check network connection and trigger actions on the server
+	-- check network connection
 	local enabled = "no"
 	local n_status, n_err = pcall(function()
-		Network.requestString(enabled_url)
+		enabled = Network.requestString(enabled_url)
+		if enabled ~= "yes" then
+			error("manually disabled")
+		end
 	end)
 	if not n_status then
-		if enabled ~= "yes" then
+		if n_err:sub(-17) == "manually disabled" then
 			updateState("disabled", n_err)
 			-- trying to forcibly enable the updater is not a good idea
 			-- because you will most likely download a broken grid launcher
@@ -110,7 +127,7 @@ status, err = pcall(function()
 		getServerState()
 	end
 
-	local latest_ver = state:sub(24)
+	local latest_ver = state:sub(25, -2)
 	-- display version information
 	if vp[2] == "%NOVERSION%" then
 		updateState("showversion-noinstall", latest_ver)

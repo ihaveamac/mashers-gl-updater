@@ -17,7 +17,7 @@ function displayError(err)
     Console.show(co)
 end
 function drawLine(clr)
-    Screen.fillEmptyRect(6, 394, 20, 21, clr, TOP_SCREEN)
+    Screen.fillEmptyRect(6, 394, 17, 18, clr, TOP_SCREEN)
 end
 
 -- credits
@@ -122,7 +122,11 @@ function updateState(stype, info)
         -- crappy workaround to highlight specific words
         print(5, 25, "The latest version is "..info..".", Color.new(127, 127, 255))
         print(5, 25, "The latest version is")
-        print(5, 45, "The grid launcher's location is:")
+        if force_path == "" then
+            print(5, 45, "The launcher's detected location is:")
+        else
+            print(5, 45, "The launcher's manually set location is:")
+        end
         print(5, 60, vp[1], Color.new(127, 127, 255))
         print(5, 80, "The updater will also be updated at:")
         print(5, 95, "/gridlauncher/update")
@@ -146,7 +150,11 @@ function updateState(stype, info)
         print(5, 65, "This might be because you are not using the")
         print(5, 80, "grid launcher yet, and are using this")
         print(5, 95, "program to install it.")
-        print(5, 115, "The grid launcher will be installed to:")
+        if force_path == "" then
+            print(5, 115, "The grid launcher will be installed to:")
+        else
+            print(5, 115, "The launcher's manually set location is:")
+        end
         print(5, 130, vp[1], Color.new(127, 127, 255))
         print(5, 150, "The updater will also be updated at:")
         print(5, 165, "/gridlauncher/update")
