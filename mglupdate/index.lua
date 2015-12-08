@@ -12,8 +12,36 @@ FCREATE = 2
 enabled_url = "http://ianburgwin.net/mglupdate-2/enabled"
 versionh_url = "http://ianburgwin.net/mglupdate-2/version.h"
 launcherzip_url = "http://ianburgwin.net/mglupdate-2/launcher.zip"
-changelog_url = "http://ianburgwin.net/mglupdate-2/Update-Changelog.md"
-changelog_beta_url = "http://ianburgwin.net/mglupdate-2/Update-Changelog-Beta.md"
+changelog_url = "http://ianburgwin.net/mglupdate-2/Updating-Changelog.md"
+changelog_beta_url = "http://ianburgwin.net/mglupdate-2/Updating-Changelog-Beta.md"
+
+changelog = false;
+
+-- get changelog
+--noinspection UnusedDef
+function getChangelog(type, version)
+	-- type is currently unused
+	if not changelog then
+		changelog = {}
+		local tmp_changelog = Network.requestString(changelog_beta_url)
+		local current_ver
+		for v in string.gmatch(tmp_changelog, '([^\n]+)') do
+			if v:sub(1, 4) == "<!--" or v:sub(1, 2) == "- " or v:sub(1, 3) == "-->" or v == "" then
+				-- nothing.
+			elseif v:sub(1, 8) == "## Beta " then
+				current_ver = v:sub(9)
+				changelog["b"..current_ver] = ""
+			else
+				changelog["b"..current_ver] = changelog["b"..current_ver]..v.."\n"
+			end
+		end
+	end
+
+	if not changelog[version] then
+		error("bad changelog version: \""..version.."\"")
+	end
+	return changelog[version]
+end
 
 -- default updater config contents
 skip_info = false

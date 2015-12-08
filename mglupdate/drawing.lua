@@ -32,7 +32,7 @@ function drawMainInfo(clr)
         print(5, 5, "Grid Launcher Update - Installed: "..vp[2], c_light_blue, true)
         print(5, 5, "Grid Launcher Update - Installed: ", c_grey, true)
     end
-    print(5, 5, "Grid Launcher Update", false--[[weird workaround]], true)
+    print(5, 5, "Grid Launcher Update")
     printb(5, 5, "updater "..version, c_grey)
     printb(5, 25, "grid launcher by mashers", c_grey)
     printb(10, 40, "gbatemp.net/threads/397527/", c_grey)
@@ -44,6 +44,7 @@ end
 -- update information on screen
 lastState = ""
 function updateState(stype, info)
+
     -- getting latest information
     if stype == "prepare" or stype == "cacheupdating" then
         drawMainInfo(Color.new(0, 0, 255))
@@ -141,21 +142,55 @@ function updateState(stype, info)
             if Controls.check(pad, KEY_B) then exit()
             elseif Controls.check(pad, KEY_X) then
                 local result = updateState("showchangelog", info)
-                if result then return
-                else exit() end
+                if not result then exit() end
             elseif Controls.check(pad, KEY_A) then return end
         end
 
     -- show changelog
     elseif stype == "showchangelog" then
-        drawMainInfo(Color.new(255, 0, 0))
-        print(5, 25, "not yet implemented")
-        print(5, 65, "Y: exit")
-        Screen.flip()
+        local chg = Console.new(TOP_SCREEN)
+        local function drawChangelog(ver, installed_ver)
+            Screen.refresh()
+            Screen.clear(TOP_SCREEN)
+            Screen.clear(BOTTOM_SCREEN)
+            printb(5, 5, "Grid Launcher Update")
+            Screen.fillEmptyRect(6, 314, 17, 18, Color.new(85, 85, 255), BOTTOM_SCREEN)
+            Console.clear(chg)
+            Console.append(chg, getChangelog("beta", ver))
+            Console.show(chg)
+            printb(5, 25, "Displaying changelog for "..ver)
+            printb(5, 65, "Left/Up: newer version")
+            printb(5, 80, "Down/Right: older version")
+            printb(5, 95, "Y: latest version")
+            printb(5, 135, "A: download and install "..installed_ver)
+            printb(5, 150, "B: exit")
+            Screen.flip()
+        end
+        drawChangelog(vp[2], vp[2])
+        local selected_ver = vp[2]
+        local pad, oldpad
         while true do
-            if Controls.check(Controls.read(), KEY_Y) then
-                exit()
-            end
+            pad = Controls.read()
+            if (Controls.check(pad, KEY_DLEFT) or Controls.check(pad, KEY_DUP)) and not (Controls.check(oldpad, KEY_DLEFT) or Controls.check(oldpad, KEY_DUP)) then
+                -- there's some really crappy workaround here...
+                if selected_ver ~= vp[2] then
+                    --noinspection UnusedDef
+                    selected_ver = string.sub("b"..selected_ver:sub(2) + 1, 1, -3)
+                    drawChangelog(selected_ver, vp[2])
+                end
+            elseif (Controls.check(pad, KEY_DDOWN) or Controls.check(pad, KEY_DRIGHT)) and not (Controls.check(oldpad, KEY_DDOWN) or Controls.check(oldpad, KEY_DRIGHT)) then
+                if selected_ver ~= "b1" then
+                    --noinspection UnusedDef
+                    selected_ver = string.sub("b"..selected_ver:sub(2) - 1, 1, -3)
+                    drawChangelog(selected_ver, vp[2])
+                end
+            elseif Controls.check(pad, KEY_Y) and not Controls.check(oldpad, KEY_Y) then
+                --noinspection UnusedDef
+                selected_ver = vp[2]
+                drawChangelog(selected_ver, vp[2])
+            elseif Controls.check(pad, KEY_A) then return true
+            elseif Controls.check(pad, KEY_B) then exit() end
+            oldpad = pad
         end
     
     -- show version and other information if glinfo.txt is missing
