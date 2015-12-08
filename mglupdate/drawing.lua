@@ -134,7 +134,7 @@ function updateState(stype, info)
         print(5, 80, "The updater will also be updated at:")
         print(5, 95, "/gridlauncher/update")
         print(5, 135, "A: download and install")
-        print(5, 150, "X: display changes for "..info.." (NYI)")
+        print(5, 150, "X: display changes for "..info)
         print(5, 165, "B: exit")
         Screen.flip()
         while true do
