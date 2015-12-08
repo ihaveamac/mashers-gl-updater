@@ -1,7 +1,7 @@
 --ihaveamac--
 -- updater issues go to https://github.com/ihaveamac/mashers-gl-updater/issues
 -- licensed under the MIT license: https://github.com/ihaveamac/mashers-gl-updater/blob/master/LICENSE.md
-version = "2.3b"
+version = "2.21"
 
 -- temporary workaround due to a mistake in the current lpp-3ds build
 FREAD = 0
